@@ -2,15 +2,13 @@ import os
 import time
 import pickle
 import matplotlib.pyplot as plt
+from utils.load_data import load_data, train_test_split
 from tensorflow.keras.models import save_model, load_model
-
 from tensorflow.keras.callbacks import History, TensorBoard, ModelCheckpoint
 from tensorflow.keras.utils import plot_model
 
-from utils.load_data import load_data, train_test_split
 
-
-def train_model(model, epoch, loss='mse', optimizer='rmsprop', test_size=7, random_state=42, matrics=None):
+def train_model(model, epoch, loss='mse', optimizer='rmsprop', test_size=7, random_state=42, matrics=None, plot=False):
     matrics = ['mse'] if matrics is None else matrics
     model_name = model.name
     model_path = os.path.join(os.path.abspath(os.curdir), "models", model_name, get_time_stamp())
@@ -25,14 +23,16 @@ def train_model(model, epoch, loss='mse', optimizer='rmsprop', test_size=7, rand
     history = History()
     tensorboard = TensorBoard(log_dir=os.path.join(model_path, "logs"), update_freq="epoch")
     checkpoints = ModelCheckpoint(os.path.join(model_path, "checkpoint", "weights-{epoch:02d}.hdf5"),
-                                  monitor='val_loss',
-                                  save_weights_only=True, mode='auto', save_freq='epoch')
+                                  monitor='val_loss', mode='auto', save_freq='epoch')
     model.fit((x1_train, x2_train, x3_train, x4_train), y_train,
               validation_data=((x1_test, x2_test, x3_test, x4_test), y_test),
               callbacks=[history, tensorboard, checkpoints],
               epochs=epoch)
     save_model(model, os.path.join(model_path, "model.h5"))
-    plot_history(history.history)
+    if plot:
+        plot_history(history.history)
+    else:
+        plot_history(history.history, model_path)
     with open(os.path.join(model_path, "history.pickle"), 'wb') as f:
         pickle.dump(history.history, f)
 
@@ -53,19 +53,16 @@ def load_and_plot_history(path):
     plot_history(history)
 
 
-def plot_history(history):
-    plt.plot(history['mse'])
+def plot_history(history, path=None):
     plt.plot(history['loss'])
-    plt.title('Training Error')
-    plt.ylabel('Error')
-    plt.xlabel('Epoch')
-    plt.legend(['Train', 'Test'], loc='upper left')
-    plt.show()
-
-    plt.plot(history['val_mse'])
     plt.plot(history['val_loss'])
+    plt.plot(history['mse'])
+    plt.plot(history['val_mse'])
     plt.title('Test Error')
     plt.ylabel('Error')
     plt.xlabel('Epoch')
     plt.legend(['Train', 'Test'], loc='upper left')
-    plt.show()
+    if path:
+        plt.savefig(os.path.join(path, "Training_Error.png"))
+    else:
+        plt.show()

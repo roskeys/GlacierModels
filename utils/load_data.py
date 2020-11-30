@@ -118,4 +118,5 @@ def data_generator(x1, x2, x3, x4, y):
 
 if __name__ == '__main__':
     variable, target = load_data("../data")
-    flat_data(variable, target)
+    x, y = flat_data(variable, target)
+    print(x.shape)
