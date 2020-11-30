@@ -60,12 +60,21 @@ def load_data(path):
     humidity = _get_2d_array(pd.read_csv(os.path.join(path, "CalHum_std_fill.csv.csv")))
     temperature = _get_2d_array(pd.read_csv(os.path.join(path, "Temp_fill.csv")))
     precipitation = _get_1d_array(pd.read_csv(os.path.join(path, "monthly_total_precipitation.csv")))
+    n_training_examples = len(smb)
     x = [np.concatenate([cloud, wind, precipitation], axis=1),
-         np.expand_dims(humidity[:-9], -1),
-         np.expand_dims(pressure[:-9], -1),
-         np.expand_dims(temperature[:-9], -1)]
+         np.expand_dims(humidity[:n_training_examples], -1),
+         np.expand_dims(pressure[:n_training_examples], -1),
+         np.expand_dims(temperature[:n_training_examples], -1)]
     return x, smb
 
+
+def flat_data(x, y):
+    x1, x2, x3, x4 = x
+    x1_1 = np.expand_dims(np.expand_dims(x1[:, :12], 1), -1)
+    x1_2 = np.expand_dims(np.expand_dims(x1[:, 12:24], 1), -1)
+    x1_3 = np.expand_dims(np.expand_dims(x1[:, 24:36], 1), -1)
+    new_x = np.concatenate([x2, x3, x4, x1_1, x1_2, x1_3], axis=1)
+    return new_x, y
 
 def train_test_split(x, y, test_size=7, random_state=None):
     if random_state:
@@ -88,4 +97,5 @@ def data_generator(x1, x2, x3, x4, y):
 
 
 if __name__ == '__main__':
-    load_data("../data")
+    variable, target = load_data("../data")
+    flat_data(variable, target)

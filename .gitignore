@@ -138,4 +138,5 @@ dmypy.json
 cython_debug/
 models/
 .idea/
+backup/
 test.py
