@@ -3,12 +3,12 @@ import time
 import pickle
 import matplotlib.pyplot as plt
 from keras.callbacks import History, TensorBoard, ModelCheckpoint
-from utils.load_data import load_data
+from utils.load_data import load_data, train_test_split
 from keras.utils.vis_utils import plot_model
-from keras.models import save_model
+from keras.models import save_model, load_model
 
 
-def train_model(model, epoch, loss='mse', optimizer='rmsprop', validation_split=0.1, matrics=None):
+def train_model(model, epoch, loss='mse', optimizer='rmsprop', test_size=7, random_state=42, matrics=None):
     matrics = ['mse'] if matrics is None else matrics
     model_name = model.name
     model_path = os.path.join(os.path.abspath(os.curdir), "./models", model_name, get_time_stamp())
@@ -17,18 +17,25 @@ def train_model(model, epoch, loss='mse', optimizer='rmsprop', validation_split=
     plot_model(model, to_file=os.path.join(model_path, f"{model_name}.png"))
     model.compile(loss=loss, optimizer=optimizer, metrics=matrics)
     x_1, (x_2, x_3, x_4), y = load_data("./data")
+    x1_train, x2_train, x3_train, x4_train, y_train, x1_test, x2_test, x3_test, x4_test, y_test = train_test_split(
+        (x_1, x_2, x_3, x_4), y, test_size=test_size, random_state=random_state)
     history = History()
     tensorboard = TensorBoard(log_dir=os.path.join(model_path, "./logs"), update_freq="epoch")
     checkpoints = ModelCheckpoint(os.path.join(model_path, "checkpoint"), save_best_only=False, monitor="loss")
-    model.fit((x_1, x_2, x_3, x_4), y, validation_split=validation_split, callbacks=[history, tensorboard, checkpoints],
+    model.fit((x1_train, x2_train, x3_train, x4_train), y_train,
+              validation_data=((x1_test, x2_test, x3_test, x4_test), y_test),
+              callbacks=[history, tensorboard, checkpoints],
               epochs=epoch)
     save_model(model, os.path.join(model_path, "model.h5"))
     plot_history(history.history)
     with open(os.path.join(model_path, "history.pickle"), 'wb') as f:
         pickle.dump(history.history, f)
 
+
 def load_check_point(path):
-    pass
+    model = load_model(path)
+    print(model.summary())
+    return model
 
 
 def get_time_stamp():

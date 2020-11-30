@@ -5,9 +5,6 @@ from keras.layers import Dense, Dropout, LeakyReLU, LSTM, MaxPooling2D, Conv2D, 
 from keras.activations import relu
 from keras import backend as K
 from keras.backend import expand_dims
-from keras.utils.vis_utils import plot_model
-from utils import get_time_stamp, load_data, train_test_split, plot_history
-from keras.callbacks import TensorBoard, History, ModelCheckpoint
 
 
 def getModel(name):
@@ -48,21 +45,7 @@ def getModel(name):
 
 if __name__ == '__main__':
     path_name = os.path.basename(sys.argv[0])[:-3]
-    # from utils import train_model
-    # train_model(model, epoch=10,  loss='mse', optimizer='rmsprop', validation_split=0.1, matrics=['mse'])
+    from utils import train_model
 
-    model_path = os.path.join(os.path.abspath(os.curdir), "./models", path_name, get_time_stamp())
-    if not os.path.exists(model_path):
-        os.makedirs(model_path)
     model = getModel(path_name)
-    model.compile(loss="mse", optimizer="adam", metrics=["mse"])
-
-    x_1, (x_2, x_3, x_4), y = load_data("data")
-    x1_train, x2_train, x3_train, x4_train, y_train, x1_test, x2_test, x3_test, x4_test, y_test = train_test_split(
-        (x_1, x_2, x_3, x_4), y, test_size=7, random_state=42)
-    # history = History()
-
-    checkpoints = ModelCheckpoint(os.path.join(model_path, "checkpoint"), save_best_only=False, monitor="loss")
-    model.fit((x_1, x_2, x_3, x_4), y, validation_split=0.1, callbacks=[checkpoints], epochs=10)
-    results = model.evaluate((x1_test, x2_test, x3_test, x4_test), y_test)
-    # plot_history(history.history)
+    train_model(model, epoch=100, loss='mse', optimizer='rmsprop', test_size=7, random_state=42, matrics=['mse'])
