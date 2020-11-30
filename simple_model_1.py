@@ -1,19 +1,23 @@
 import os
 import sys
-from keras import Model
-from keras.layers import Dense, Dropout, LeakyReLU, LSTM, MaxPooling2D, Conv2D, Flatten, concatenate
-from keras.activations import relu
-from keras import backend as K
-from keras.backend import expand_dims
+import tensorflow as tf
+from tensorflow.keras import Model, Input
+from tensorflow.keras.layers import Dense, Dropout, LeakyReLU, LSTM, MaxPooling2D, Conv2D, Flatten, concatenate
+from tensorflow.keras.activations import relu
+
+
+# from tensorflow.keras import backend as K
+# from keras.backend import expand_dims
 
 
 def getModel(name):
     # a training example is one dimensional vector 36 is the size
-    input_x1 = K.placeholder(shape=(None, 36,), name="cloud_wind_precipitation")
+    input_x1 = Input(shape=(36,), name="cloud_wind_precipitation")
+
     # a training example is 6 values a month,
-    input_x2 = K.placeholder(shape=(None, 40, 12, 1), name="Humidity")
-    input_x3 = K.placeholder(shape=(None, 40, 12, 1), name="Pressure")
-    input_x4 = K.placeholder(shape=(None, 40, 12, 1), name="Temperature")
+    input_x2 = Input(shape=(40, 12, 1), name="Humidity")
+    input_x3 = Input(shape=(40, 12, 1), name="Pressure")
+    input_x4 = Input(shape=(40, 12, 1), name="Temperature")
     # nn model
     nn_1 = Dense(36, activation=relu)(input_x1)
     nn_1 = Dropout(0.5)(nn_1)
@@ -35,7 +39,7 @@ def getModel(name):
 
     # joint two models
     x = concatenate([nn_1, flattened])
-    x = expand_dims(x)
+    x = tf.expand_dims(x, -1)
     lstm = LSTM(32)(x)
     fc = LeakyReLU()(Dense(24)(lstm))
     pred = Dense(1)(fc)
@@ -48,4 +52,5 @@ if __name__ == '__main__':
     from utils import train_model
 
     model = getModel(path_name)
-    train_model(model, epoch=100, loss='mse', optimizer='rmsprop', test_size=7, random_state=42, matrics=['mse'])
+    # model.compile(loss='mse', optimizer='rmsprop', metrics=['mse'])
+    train_model(model, epoch=10, loss='mse', optimizer='rmsprop', test_size=7, random_state=42, matrics=['mse'])
