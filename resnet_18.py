@@ -5,7 +5,7 @@ from keras.layers import Dense, Dropout, ReLU, LSTM, MaxPooling2D, Conv2D, Flatt
 from keras import backend as K
 from keras.backend import expand_dims
 
-def getModel(name, rows_num, column_num, channel = 1, classes):
+def getModel(name, rows_num, column_num, channel = 1):
     inpt = Input(shape = (rows_num, column_num, channel))
     model = ZeroPadding2D((3, 3))(inpt)
 

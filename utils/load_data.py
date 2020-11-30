@@ -52,6 +52,17 @@ def _get_2d_array(dataframe):
     return np.concatenate(list(_load_2d_data(dataframe)), axis=0)
 
 
+def load_data_concat(path):
+    smb = pd.read_csv(os.path.join(path, "QAJUUTTAP_SERMIA_dm.csv"))["SMB"].values
+    cloud = _get_1d_array(pd.read_csv(os.path.join(path, "mean_cloud.csv")))
+    pressure = _get_2d_array(pd.read_csv(os.path.join(path, "Pressure_fill.csv")))
+    wind = _get_1d_array(pd.read_csv(os.path.join(path, "mean_wind.csv")))
+    humidity = _get_2d_array(pd.read_csv(os.path.join(path, "CalHum_std_fill.csv.csv")))
+    temperature = _get_2d_array(pd.read_csv(os.path.join(path, "Temp_fill.csv")))
+    precipitation = _get_1d_array(pd.read_csv(os.path.join(path, "monthly_total_precipitation.csv")))
+    x = np.concatenate([cloud, wind, precipitation, np.expand_dims(humidity[:-9], -1), np.expand_dims(pressure[:-9], -1), np.expand_dims(temperature[:-9], -1)], axis=0)
+    return x, smb
+
 def load_data(path):
     smb = pd.read_csv(os.path.join(path, "QAJUUTTAP_SERMIA_dm.csv"))["SMB"].values
     cloud = _get_1d_array(pd.read_csv(os.path.join(path, "mean_cloud.csv")))
@@ -60,12 +71,21 @@ def load_data(path):
     humidity = _get_2d_array(pd.read_csv(os.path.join(path, "CalHum_std_fill.csv.csv")))
     temperature = _get_2d_array(pd.read_csv(os.path.join(path, "Temp_fill.csv")))
     precipitation = _get_1d_array(pd.read_csv(os.path.join(path, "monthly_total_precipitation.csv")))
-    x = [np.concatenate([cloud, wind, precipitation], axis=1),
+    x = [np.concatenate([cloud, wind, precipitation, np.expand_dims(humidity[:-9], -1)], axis=0),
          np.expand_dims(humidity[:-9], -1),
          np.expand_dims(pressure[:-9], -1),
          np.expand_dims(temperature[:-9], -1)]
     return x, smb
 
+def train_test_split_concat(x, y, test_size=7, random_state=None):
+    if random_state:
+        np.random.seed(random_state)
+    shuffle = np.arange(len(y))
+    np.random.shuffle(shuffle)
+    y = y[shuffle]
+    x = x[shuffle]
+    return x[test_size:], y[test_size:], \
+           x[:test_size], y[:test_size]
 
 def train_test_split(x, y, test_size=7, random_state=None):
     if random_state:
