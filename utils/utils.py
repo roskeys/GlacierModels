@@ -64,3 +64,10 @@ def plot_history(history, path=None):
         plt.savefig(os.path.join(path, "Training_Error.png"))
     else:
         plt.show()
+
+
+def pred_and_compare_side_by_side(path, x, y):
+    model = load_model(path)
+    predicted = model.predict(x)
+    for pred, actual in zip(predicted, y):
+        print(predicted, actual)
