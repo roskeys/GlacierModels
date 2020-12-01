@@ -25,7 +25,7 @@ def getModel(name):
 
     # conv1
     model = Conv2D(filters=8, kernel_size=(3, 3), padding="valid")(x)
-    model = BatchNormalization(axis=2)(model)
+    model = BatchNormalization(axis=3)(model)
     model = MaxPooling2D(pool_size=(3, 3), padding="same")(model)
 
     # conv2
@@ -33,15 +33,15 @@ def getModel(name):
     model = ResidualBlock(model, filters=8, kernel_size=(3, 3))
 
     # conv3
-    model = ResidualBlock(model, filters=16, kernel_size=(3, 3))
+    model = ResidualBlock(model, filters=16, kernel_size=(3, 3), shortcut = True)
     model = ResidualBlock(model, filters=16, kernel_size=(3, 3))
 
     # conv4
-    model = ResidualBlock(model, filters=32, kernel_size=(3, 3))
+    model = ResidualBlock(model, filters=32, kernel_size=(3, 3) ,shortcut= True)
     model = ResidualBlock(model, filters=32, kernel_size=(3, 3))
 
     # conv5
-    model = ResidualBlock(model, filters=64, kernel_size=(3, 3))
+    model = ResidualBlock(model, filters=64, kernel_size=(3, 3), shortcut = True)
     model = ResidualBlock(model, filters=64, kernel_size=(3, 3))
 
     # average
@@ -54,18 +54,23 @@ def getModel(name):
 
 
 # Defines the Residual Block, revised
-def ResidualBlock(model, filters, kernel_size, strides=(1, 1), padding='same', name=None):
+def ResidualBlock(model, filters, kernel_size, strides=(1, 1), padding='same', name=None, shortcut = False):
     bn_name = (name + "_bn") if name != None else None
     conv_name = (name + "_conv") if name != None else None
 
     # Conv->ReLU->BN
     block = Conv2D(filters, kernel_size, padding=padding, strides=strides, activation='relu', name=conv_name)(model)
-    block = BatchNormalization(axis=2, name=bn_name)(block)
+    block = BatchNormalization(axis=3, name=bn_name)(block)
 
     block = Conv2D(filters, kernel_size, padding=padding, strides=strides, activation='relu', name=conv_name)(block)
-    block = BatchNormalization(axis=2, name=bn_name)(block)
+    block = BatchNormalization(axis=3, name=bn_name)(block)
 
-    block = add([model, block])
+    if shortcut:
+        shortcutBlock = Conv2D(filters, kernel_size, padding=padding, strides=strides, activation='relu', name=conv_name)(model)
+        shortcutBlock = BatchNormalization(axis=3, name=bn_name)(shortcutBlock)
+        block = add([model, shortcutBlock])
+    else:
+        block = add([model, block])
 
     return block
 
