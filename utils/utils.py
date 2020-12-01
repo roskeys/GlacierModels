@@ -56,9 +56,7 @@ def load_and_plot_history(path):
 def plot_history(history, path=None):
     plt.plot(history['loss'])
     plt.plot(history['val_loss'])
-    plt.plot(history['mse'])
-    plt.plot(history['val_mse'])
-    plt.title('Test Error')
+    plt.title('Loss and val_loss')
     plt.ylabel('Error')
     plt.xlabel('Epoch')
     plt.legend(['Train', 'Test'], loc='upper left')
