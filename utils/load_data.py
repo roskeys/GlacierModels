@@ -60,8 +60,11 @@ def load_data_concat(path):
     humidity = _get_2d_array(pd.read_csv(os.path.join(path, "CalHum_std_fill.csv.csv")))
     temperature = _get_2d_array(pd.read_csv(os.path.join(path, "Temp_fill.csv")))
     precipitation = _get_1d_array(pd.read_csv(os.path.join(path, "monthly_total_precipitation.csv")))
-    x = np.concatenate([cloud, wind, precipitation, np.expand_dims(humidity[:-9], -1), np.expand_dims(pressure[:-9], -1), np.expand_dims(temperature[:-9], -1)], axis=0)
+    x = np.concatenate(
+        [cloud, wind, precipitation, np.expand_dims(humidity[:-9], -1), np.expand_dims(pressure[:-9], -1),
+         np.expand_dims(temperature[:-9], -1)], axis=0)
     return x, smb
+
 
 def load_data(path):
     smb = pd.read_csv(os.path.join(path, "QAJUUTTAP_SERMIA_dm.csv"))["SMB"].values
@@ -78,6 +81,7 @@ def load_data(path):
          np.expand_dims(temperature[:n_training_examples], -1)]
     return x, smb
 
+
 def train_test_split_concat(x, y, test_size=7, random_state=None):
     if random_state:
         np.random.seed(random_state)
@@ -88,6 +92,7 @@ def train_test_split_concat(x, y, test_size=7, random_state=None):
     return x[test_size:], y[test_size:], \
            x[:test_size], y[:test_size]
 
+
 def flat_data(x, y):
     x1, x2, x3, x4 = x
     x1_1 = np.expand_dims(np.expand_dims(x1[:, :12], 1), -1)
@@ -96,18 +101,22 @@ def flat_data(x, y):
     new_x = np.concatenate([x2, x3, x4, x1_1, x1_2, x1_3], axis=1)
     return new_x, y
 
-def train_test_split(x, y, test_size=7, random_state=None):
-    if random_state:
-        np.random.seed(random_state)
-    shuffle = np.arange(len(y))
-    np.random.shuffle(shuffle)
-    y = y[shuffle]
-    x1 = x[0][shuffle]
-    x2 = x[1][shuffle]
-    x3 = x[2][shuffle]
-    x4 = x[3][shuffle]
-    return x1[test_size:], x2[test_size:], x3[test_size:], x4[test_size:], y[test_size:], \
-           x1[:test_size], x2[:test_size], x3[:test_size], x4[:test_size], y[:test_size]
+
+def train_test_split(x, y, test_size=7, random_state=None, shuffle=True):
+    if shuffle:
+        if random_state:
+            np.random.seed(random_state)
+        shuffle = np.arange(len(y))
+        np.random.shuffle(shuffle)
+        y = y[shuffle]
+        x1 = x[0][shuffle]
+        x2 = x[1][shuffle]
+        x3 = x[2][shuffle]
+        x4 = x[3][shuffle]
+    else:
+        x1, x2, x3, x4 = x[0], x[1], x[2], x[3]
+    return x1[:-test_size], x2[:-test_size], x3[:-test_size], x4[:-test_size], y[:-test_size], \
+           x1[-test_size:], x2[-test_size:], x3[-test_size:], x4[-test_size:], y[-test_size:]
 
 
 def data_generator(x1, x2, x3, x4, y):
