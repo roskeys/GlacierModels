@@ -24,7 +24,7 @@ def getModel(name):
     print(x.shape)
 
     # conv1
-    model = Conv2D(filters=4, kernel_size=(3, 3), padding="valid")(x)
+    model = Conv2D(filters=8, kernel_size=(3, 3), padding="valid")(x)
     model = BatchNormalization(axis=2)(model)
     model = MaxPooling2D(pool_size=(3, 3), padding="same")(model)
 
@@ -58,14 +58,12 @@ def ResidualBlock(model, filters, kernel_size, strides=(1, 1), padding='same', n
     bn_name = (name + "_bn") if name != None else None
     conv_name = (name + "_conv") if name != None else None
 
-    # BN->ReLU->Conv->BN->ReLU->Conv
-    block = BatchNormalization(axis=2, name=bn_name)(model)
-    block = ReLU()(block)
-    block = Conv2D(filters, kernel_size, padding=padding, strides=strides, name=conv_name)(block)
-
+    # Conv->ReLU->BN
+    block = Conv2D(filters, kernel_size, padding=padding, strides=strides, activation='relu', name=conv_name)(model)
     block = BatchNormalization(axis=2, name=bn_name)(block)
-    block = ReLU()(block)
-    block = Conv2D(filters, kernel_size, padding=padding, strides=strides, name=conv_name)(block)
+
+    block = Conv2D(filters, kernel_size, padding=padding, strides=strides, activation='relu', name=conv_name)(block)
+    block = BatchNormalization(axis=2, name=bn_name)(block)
 
     block = add([model, block])
 
