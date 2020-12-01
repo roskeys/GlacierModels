@@ -46,6 +46,8 @@ def getModel(name):
 
     # average
     # model = AveragePooling2D(pool_size=(2, 2))(model)
+    model = Flatten()(model)
+    model = tf.expand_dims(model, -1)
     model = LSTM(32)(model)
     model = Flatten()(model)
     model = Dense(1)(model)
