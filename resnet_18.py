@@ -68,7 +68,7 @@ def ResidualBlock(model, filters, kernel_size, strides=(1, 1), padding='same', n
     if shortcut:
         shortcutBlock = Conv2D(filters, kernel_size, padding=padding, strides=strides, activation='relu', name=conv_name)(model)
         shortcutBlock = BatchNormalization(axis=3, name=bn_name)(shortcutBlock)
-        block = add([model, shortcutBlock])
+        block = add([block, shortcutBlock])
     else:
         block = add([model, block])
 
