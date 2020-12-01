@@ -5,7 +5,7 @@ import sys
 import tensorflow as tf
 from tensorflow.keras import Model, Input
 from tensorflow.keras.layers import Dense, ReLU, Conv2D, BatchNormalization, Input, add, Flatten, MaxPooling2D, \
-    AveragePooling2D, concatenate
+    AveragePooling2D, concatenate, LSTM
 
 
 def getModel(name):
@@ -45,8 +45,9 @@ def getModel(name):
     model = ResidualBlock(model, filters=64, kernel_size=(3, 3))
 
     # average
-    model = AveragePooling2D(pool_size=(2, 2))(model)
+    # model = AveragePooling2D(pool_size=(2, 2))(model)
     model = Flatten()(model)
+    model = LSTM(32)(model)
     model = Dense(1)(model)
 
     m = Model(inputs=[input_x1, input_x2, input_x3, input_x4], outputs=model, name=name)
