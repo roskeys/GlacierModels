@@ -6,6 +6,7 @@ import tensorflow as tf
 from tensorflow.keras import Model, Input
 from tensorflow.keras.layers import Dense, Dropout, LeakyReLU, LSTM, MaxPooling2D, Conv2D, Flatten, concatenate
 from tensorflow.keras.activations import relu
+from resnet_18 import ResidualBlock
 
 
 def getModel(name):
@@ -22,20 +23,14 @@ def getModel(name):
 
     x = concatenate([input_x2, input_x3, input_x4, input_x1_1, input_x1_2, input_x1_3], axis=1)
 
-    # nn model
-    nn_1 = Dense(36, activation=relu)(input_x1)
-    nn_1 = Dropout(0.5)(nn_1)
+    cnn_1 = ResidualBlock(x, filters=8, kernel_size=3, strides=(1, 1), padding='same', shortcut=True)
+    cnn_2 = ResidualBlock(cnn_1, filters=8, kernel_size=3, strides=(1, 1), padding='same', shortcut=True)
+    cnn_3 = ResidualBlock(cnn_2, filters=8, kernel_size=3, strides=(1, 1), padding='same', shortcut=True)
 
-    # cnn layer 2
-    cnn_2 = Conv2D(3, kernel_size=(3, 3), padding='same', activation=relu, name="cnn_combine")(x)
-    pool = MaxPooling2D(pool_size=(2, 2))(cnn_2)
+    pool = MaxPooling2D(pool_size=(2, 2))(cnn_3)
     flattened = Flatten()(pool)
-
-    # joint two models
-    x = concatenate([nn_1, flattened])
-    x = tf.expand_dims(x, -1)
-    lstm = LSTM(32)(x)
-    fc = LeakyReLU()(Dense(24)(lstm))
+    lstm = Dense(64)(flattened)
+    fc = LeakyReLU()(Dense(32)(lstm))
     pred = Dense(1)(fc)
     m = Model(inputs=[input_x1, input_x2, input_x3, input_x4], outputs=pred, name=name)
     return m
