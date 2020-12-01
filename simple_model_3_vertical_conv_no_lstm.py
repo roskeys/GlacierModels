@@ -4,7 +4,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 import sys
 import tensorflow as tf
 from tensorflow.keras import Model, Input
-from tensorflow.keras.layers import Dense, Dropout, LeakyReLU, LSTM, MaxPooling2D, Conv2D, Flatten, concatenate
+from tensorflow.keras.layers import Dense, Dropout, LeakyReLU, Conv2D, Flatten, concatenate
 from tensorflow.keras.activations import relu
 
 
@@ -21,11 +21,11 @@ def getModel(name):
     nn_1 = Dropout(0.5)(nn_1)
 
     # cnn layer 1 branch 1
-    cnn_1_1 = Conv2D(4, kernel_size=(1, 12), padding='valid', activation=relu)(input_x2)
+    cnn_1_1 = Conv2D(4, kernel_size=(40, 1), padding='valid', activation=relu)(input_x2)
     # cnn layer 1 branch 2
-    cnn_1_2 = Conv2D(4, kernel_size=(1, 12), padding='valid', activation=relu)(input_x3)
+    cnn_1_2 = Conv2D(4, kernel_size=(40, 1), padding='valid', activation=relu)(input_x3)
     # cnn layer 1 branch 3
-    cnn_1_3 = Conv2D(4, kernel_size=(1, 12), padding='valid', activation=relu)(input_x4)
+    cnn_1_3 = Conv2D(4, kernel_size=(40, 1), padding='valid', activation=relu)(input_x4)
     # cnn concat branches
     cnn_concat = concatenate([cnn_1_1, cnn_1_2, cnn_1_3], axis=-1)
     # cnn layer 2
@@ -34,9 +34,8 @@ def getModel(name):
 
     # joint two models
     x = concatenate([nn_1, flattened])
-    x = tf.expand_dims(x, -1)
-    lstm = LSTM(32)(x)
-    fc = LeakyReLU()(Dense(24)(lstm))
+    fc1 = Dense(32)(x)
+    fc = LeakyReLU()(Dense(24)(fc1))
     pred = Dense(1)(fc)
     m = Model(inputs=[input_x1, input_x2, input_x3, input_x4], outputs=pred, name=name)
     return m
@@ -47,4 +46,4 @@ if __name__ == '__main__':
     from utils import train_model
 
     model = getModel(path_name)
-    train_model(model, epoch=100, loss='mse', optimizer='rmsprop', test_size=7, random_state=42, matrics=['mse'])
+    train_model(model, epoch=200, loss='mse', optimizer='rmsprop', test_size=7, random_state=42, matrics=['mse'])

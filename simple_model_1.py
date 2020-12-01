@@ -50,4 +50,4 @@ if __name__ == '__main__':
     from utils import train_model
 
     model = getModel(path_name)
-    train_model(model, epoch=100, loss='mse', optimizer='rmsprop', test_size=7, random_state=42, matrics=['mse'])
+    train_model(model, epoch=200, loss='mse', optimizer='rmsprop', test_size=7, random_state=42, matrics=['mse'])

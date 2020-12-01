@@ -16,18 +16,21 @@ def getModel(name):
     input_x2 = Input(shape=(40, 12, 1), name="Humidity")
     input_x3 = Input(shape=(40, 12, 1), name="Pressure")
     input_x4 = Input(shape=(40, 12, 1), name="Temperature")
-    input_x5 = concatenate([input_x2, input_x3, input_x4], axis=-1)
     # nn model
     nn_1 = Dense(36, activation=relu)(input_x1)
     nn_1 = Dropout(0.5)(nn_1)
 
     # cnn layer 1 branch 1
-    cnn_1_1 = Conv2D(3, kernel_size=(3, 3), padding='same', activation=relu)(input_x5)
-
+    cnn_1_1 = Conv2D(4, kernel_size=(40, 1), padding='valid', activation=relu)(input_x2)
+    # cnn layer 1 branch 2
+    cnn_1_2 = Conv2D(4, kernel_size=(40, 1), padding='valid', activation=relu)(input_x3)
+    # cnn layer 1 branch 3
+    cnn_1_3 = Conv2D(4, kernel_size=(40, 1), padding='valid', activation=relu)(input_x4)
+    # cnn concat branches
+    cnn_concat = concatenate([cnn_1_1, cnn_1_2, cnn_1_3], axis=-1)
     # cnn layer 2
-    cnn_2 = Conv2D(3, kernel_size=(3, 3), padding='same', activation=relu, name="cnn_combine")(cnn_1_1)
-    pool = MaxPooling2D(pool_size=(2, 2))(cnn_2)
-    flattened = Flatten()(pool)
+    cnn_2 = Conv2D(3, kernel_size=(2, 1), padding='same', activation=relu, name="cnn_combine")(cnn_concat)
+    flattened = Flatten()(cnn_2)
 
     # joint two models
     x = concatenate([nn_1, flattened])
@@ -44,4 +47,4 @@ if __name__ == '__main__':
     from utils import train_model
 
     model = getModel(path_name)
-    train_model(model, epoch=200, loss='mse', optimizer='rmsprop', test_size=7, random_state=35, matrics=['mse'])
+    train_model(model, epoch=2000, loss='mse', optimizer='rmsprop', test_size=7, random_state=42, matrics=['mse'])

@@ -8,6 +8,7 @@ from tensorflow.keras.layers import Dense, Dropout, LeakyReLU, LSTM, MaxPooling2
 from tensorflow.keras.activations import relu
 from tensorflow.keras.backend import std
 
+
 def getModel(name):
     # a training example is one dimensional vector 36 is the size
     input_x1 = Input(shape=(36,), name="cloud_wind_precipitation")
@@ -16,10 +17,10 @@ def getModel(name):
     input_x2 = Input(shape=(40, 12, 1), name="Humidity")
     input_x3 = Input(shape=(40, 12, 1), name="Pressure")
     input_x4 = Input(shape=(40, 12, 1), name="Temperature")
-
+    input_x4_new = input_x4 - 2732.0
     input_x2_std = tf.expand_dims(std(input_x2, axis=1), 1)
     input_x3_std = tf.expand_dims(std(input_x3, axis=1), 1)
-    input_x4_std = tf.expand_dims(std(input_x4, axis=1), 1)
+    input_x4_std = tf.expand_dims(std(input_x4_new, axis=1), 1)
 
     input_x2_with_std = concatenate([input_x2, input_x2_std], axis=1)
     input_x3_with_std = concatenate([input_x3, input_x3_std], axis=1)
@@ -59,4 +60,4 @@ if __name__ == '__main__':
     from utils import train_model
 
     model = getModel(path_name)
-    train_model(model, epoch=100, loss='mse', optimizer='rmsprop', test_size=7, random_state=42, matrics=['mse'])
+    train_model(model, epoch=200, loss='mse', optimizer='rmsprop', test_size=7, random_state=42, matrics=['mse'])
