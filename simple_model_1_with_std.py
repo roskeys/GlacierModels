@@ -6,7 +6,7 @@ import tensorflow as tf
 from tensorflow.keras import Model, Input
 from tensorflow.keras.layers import Dense, Dropout, LeakyReLU, LSTM, MaxPooling2D, Conv2D, Flatten, concatenate
 from tensorflow.keras.activations import relu
-
+from tensorflow.keras.backend import std
 
 def getModel(name):
     # a training example is one dimensional vector 36 is the size
@@ -16,21 +16,33 @@ def getModel(name):
     input_x2 = Input(shape=(40, 12, 1), name="Humidity")
     input_x3 = Input(shape=(40, 12, 1), name="Pressure")
     input_x4 = Input(shape=(40, 12, 1), name="Temperature")
+
+    input_x2_std = tf.expand_dims(std(input_x2, axis=1), 1)
+    input_x3_std = tf.expand_dims(std(input_x3, axis=1), 1)
+    input_x4_std = tf.expand_dims(std(input_x4, axis=1), 1)
+
+    input_x2_with_std = concatenate([input_x2, input_x2_std], axis=1)
+    input_x3_with_std = concatenate([input_x3, input_x3_std], axis=1)
+    input_x4_with_std = concatenate([input_x4, input_x4_std], axis=1)
+
     # nn model
     nn_1 = Dense(36, activation=relu)(input_x1)
     nn_1 = Dropout(0.5)(nn_1)
 
     # cnn layer 1 branch 1
-    cnn_1_1 = Conv2D(4, kernel_size=(1, 12), padding='valid', activation=relu)(input_x2)
+    cnn_1_1 = Conv2D(4, kernel_size=(3, 3), padding='same', activation=relu)(input_x2_with_std)
     # cnn layer 1 branch 2
-    cnn_1_2 = Conv2D(4, kernel_size=(1, 12), padding='valid', activation=relu)(input_x3)
+    cnn_1_2 = Conv2D(4, kernel_size=(3, 3), padding='same', activation=relu)(input_x3_with_std)
     # cnn layer 1 branch 3
-    cnn_1_3 = Conv2D(4, kernel_size=(1, 12), padding='valid', activation=relu)(input_x4)
+    cnn_1_3 = Conv2D(4, kernel_size=(3, 3), padding='same', activation=relu)(input_x4_with_std)
+
     # cnn concat branches
     cnn_concat = concatenate([cnn_1_1, cnn_1_2, cnn_1_3], axis=-1)
+
     # cnn layer 2
-    cnn_2 = Conv2D(3, kernel_size=(2, 1), padding='same', activation=relu, name="cnn_combine")(cnn_concat)
-    flattened = Flatten()(cnn_2)
+    cnn_2 = Conv2D(3, kernel_size=(3, 3), padding='same', activation=relu, name="cnn_combine")(cnn_concat)
+    pool = MaxPooling2D(pool_size=(2, 2))(cnn_2)
+    flattened = Flatten()(pool)
 
     # joint two models
     x = concatenate([nn_1, flattened])
