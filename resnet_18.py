@@ -45,7 +45,7 @@ def getModel(name):
     model = ResidualBlock(model, filters=64, kernel_size=(3, 3))
 
     # average
-    model = AveragePooling2D(pool_size=(7, 7))(model)
+    model = AveragePooling2D(pool_size=(2, 2))(model)
     model = Flatten()(model)
     model = Dense(1)(model)
 
