@@ -46,8 +46,8 @@ def getModel(name):
 
     # average
     # model = AveragePooling2D(pool_size=(2, 2))(model)
-    model = Flatten()(model)
     model = LSTM(32)(model)
+    model = Flatten()(model)
     model = Dense(1)(model)
 
     m = Model(inputs=[input_x1, input_x2, input_x3, input_x4], outputs=model, name=name)
