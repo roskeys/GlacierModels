@@ -8,7 +8,7 @@ from tensorflow.keras.callbacks import History, TensorBoard, ModelCheckpoint
 from tensorflow.keras.utils import plot_model
 
 
-def train_model(model, epoch, loss='mse', optimizer='rmsprop', data_loader=load_data,
+def train_model(model, epoch, loss='mse', optimizer='rmsprop', data_loader=load_data, save_best_only=True,
                 train_test_spliter=train_test_split, test_size=7, random_state=42, matrics=None, plot=False,
                 shuffle=True):
     matrics = ['mse'] if matrics is None else matrics
@@ -25,7 +25,7 @@ def train_model(model, epoch, loss='mse', optimizer='rmsprop', data_loader=load_
     history = History()
     tensorboard = TensorBoard(log_dir=os.path.join(model_path, "logs"), update_freq="epoch")
     checkpoints = ModelCheckpoint(os.path.join(model_path, "checkpoints", "weights-{epoch:02d}.hdf5"),
-                                  monitor='val_loss', mode='auto', save_freq='epoch')
+                                  monitor='val_loss', mode='auto', save_freq='epoch', save_best_only=save_best_only)
     model.fit(x_train, y_train,
               validation_data=(x_test, y_test),
               callbacks=[history, tensorboard, checkpoints],
@@ -33,15 +33,22 @@ def train_model(model, epoch, loss='mse', optimizer='rmsprop', data_loader=load_
     save_model(model, os.path.join(model_path, "model.h5"))
     if plot:
         plot_history(history.history)
-    else:
-        plot_history(history.history, model_path)
+    plot_history(history.history, model_path)
+
+    selected_file = os.listdir(os.path.join(model_path, "checkpoints"))[-1]
+    selected_model = load_check_point(os.path.join(model_path, "checkpoints", selected_file))
+
+    if plot:
+        predict_and_plot(selected_model, x, y)
+    predict_and_plot(selected_model, x, y, path=model_path)
+
     with open(os.path.join(model_path, "history.pickle"), 'wb') as f:
         pickle.dump(history.history, f)
 
 
 def load_check_point(path):
     model = load_model(path)
-    print(model.summary())
+    # print(model.summary())
     return model
 
 
@@ -55,7 +62,23 @@ def load_and_plot_history(path):
     plot_history(history)
 
 
+def predict_and_plot(model, x, y, path=None):
+    pred = model.predict(x)
+    plt.figure()
+    plt.plot(pred[:, 0])
+    plt.plot(y)
+    plt.title('Predicted and Actual')
+    plt.ylabel('SMB')
+    plt.xlabel('Year')
+    plt.legend(['Predicted', 'Actual'], loc='upper left')
+    if path:
+        plt.savefig(os.path.join(path, "Predicted_and_Actual.png"))
+    else:
+        plt.show()
+
+
 def plot_history(history, path=None):
+    plt.figure()
     plt.plot(history['loss'])
     plt.plot(history['val_loss'])
     plt.title('Loss and val_loss')
