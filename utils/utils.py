@@ -10,7 +10,7 @@ from tensorflow.keras.utils import plot_model
 
 def train_model(model, epoch, loss='mse', optimizer='rmsprop', data_loader=load_data, save_best_only=True,
                 train_test_spliter=train_test_split, test_size=7, random_state=42, matrics=None, plot=False,
-                shuffle=True):
+                shuffle=False):
     matrics = ['mse'] if matrics is None else matrics
     model_name = model.name
     model_path = os.path.join(os.path.abspath(os.curdir), "models", model_name, get_time_stamp())
