@@ -8,7 +8,8 @@ from tensorflow.keras.callbacks import History, TensorBoard, ModelCheckpoint
 from tensorflow.keras.utils import plot_model
 
 
-def train_model(model, epoch, loss='mse', optimizer='rmsprop', test_size=7, random_state=42, matrics=None, plot=False,
+def train_model(model, epoch, loss='mse', optimizer='rmsprop', data_loader=load_data,
+                train_test_spliter=train_test_split, test_size=7, random_state=42, matrics=None, plot=False,
                 shuffle=True):
     matrics = ['mse'] if matrics is None else matrics
     model_name = model.name
@@ -18,8 +19,8 @@ def train_model(model, epoch, loss='mse', optimizer='rmsprop', test_size=7, rand
         os.makedirs(os.path.join(model_path, "checkpoints"))
     plot_model(model, to_file=os.path.join(model_path, f"{model_name}.png"))
     model.compile(loss=loss, optimizer=optimizer, metrics=matrics)
-    (x_1, x_2, x_3, x_4), y = load_data("data")
-    x1_train, x2_train, x3_train, x4_train, y_train, x1_test, x2_test, x3_test, x4_test, y_test = train_test_split(
+    (x_1, x_2, x_3, x_4), y = data_loader("data")
+    x1_train, x2_train, x3_train, x4_train, y_train, x1_test, x2_test, x3_test, x4_test, y_test = train_test_spliter(
         (x_1, x_2, x_3, x_4), y, test_size=test_size, random_state=random_state, shuffle=shuffle)
     history = History()
     tensorboard = TensorBoard(log_dir=os.path.join(model_path, "logs"), update_freq="epoch")
