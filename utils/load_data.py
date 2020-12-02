@@ -115,8 +115,8 @@ def train_test_split(x, y, test_size=7, random_state=None, shuffle=True):
         x4 = x[3][shuffle]
     else:
         x1, x2, x3, x4 = x[0], x[1], x[2], x[3]
-    return x1[:-test_size], x2[:-test_size], x3[:-test_size], x4[:-test_size], y[:-test_size], \
-           x1[-test_size:], x2[-test_size:], x3[-test_size:], x4[-test_size:], y[-test_size:]
+    return (x1[:-test_size], x2[:-test_size], x3[:-test_size], x4[:-test_size]), y[:-test_size], \
+           (x1[-test_size:], x2[-test_size:], x3[-test_size:], x4[-test_size:]), y[-test_size:]
 
 
 def data_generator(x1, x2, x3, x4, y):

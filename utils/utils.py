@@ -19,15 +19,15 @@ def train_model(model, epoch, loss='mse', optimizer='rmsprop', data_loader=load_
         os.makedirs(os.path.join(model_path, "checkpoints"))
     plot_model(model, to_file=os.path.join(model_path, f"{model_name}.png"))
     model.compile(loss=loss, optimizer=optimizer, metrics=matrics)
-    (x_1, x_2, x_3, x_4), y = data_loader("data")
-    x1_train, x2_train, x3_train, x4_train, y_train, x1_test, x2_test, x3_test, x4_test, y_test = train_test_spliter(
-        (x_1, x_2, x_3, x_4), y, test_size=test_size, random_state=random_state, shuffle=shuffle)
+    x, y = data_loader("data")
+    x_train, y_train, x_test, y_test = train_test_spliter(x, y, test_size=test_size, random_state=random_state,
+                                                          shuffle=shuffle)
     history = History()
     tensorboard = TensorBoard(log_dir=os.path.join(model_path, "logs"), update_freq="epoch")
     checkpoints = ModelCheckpoint(os.path.join(model_path, "checkpoints", "weights-{epoch:02d}.hdf5"),
                                   monitor='val_loss', mode='auto', save_freq='epoch')
-    model.fit((x1_train, x2_train, x3_train, x4_train), y_train,
-              validation_data=((x1_test, x2_test, x3_test, x4_test), y_test),
+    model.fit(x_train, y_train,
+              validation_data=(x_test, y_test),
               callbacks=[history, tensorboard, checkpoints],
               epochs=epoch)
     save_model(model, os.path.join(model_path, "model.h5"))
