@@ -1,6 +1,7 @@
 import os
 import time
 import pickle
+import numpy as np
 import matplotlib.pyplot as plt
 from utils.load_data import load_data, train_test_split
 from tensorflow.keras.models import save_model, load_model
@@ -70,6 +71,7 @@ def predict_and_plot(model, x, y, path=None):
     plt.title('Predicted and Actual')
     plt.ylabel('SMB')
     plt.xlabel('Year')
+    plt.xticks([i for i in range(0, len(y), 5)], [str(i) for i in range(1972, 2009, 5)])
     plt.legend(['Predicted', 'Actual'], loc='upper left')
     if path:
         plt.savefig(os.path.join(path, "Predicted_and_Actual.png"))
