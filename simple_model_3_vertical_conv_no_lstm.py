@@ -44,6 +44,5 @@ def getModel(name):
 if __name__ == '__main__':
     path_name = os.path.basename(sys.argv[0])[:-3]
     from utils import train_model
-
     model = getModel(path_name)
     train_model(model, epoch=2000, loss='mse', optimizer='rmsprop', test_size=7, random_state=42, matrics=['mse'])

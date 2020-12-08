@@ -81,8 +81,8 @@ def predict_and_plot(model, x, y, path=None):
 
 def plot_history(history, path=None):
     plt.figure()
-    plt.plot(history['loss'])
-    plt.plot(history['val_loss'])
+    plt.plot(np.log(history['loss']))
+    plt.plot(np.log(history['val_loss']))
     plt.title('Loss and val_loss')
     plt.ylabel('Error')
     plt.xlabel('Epoch')

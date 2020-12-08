@@ -54,14 +54,20 @@ for y in range(len(smb)):
 models = []
 model_folders = os.listdir("models")
 model_folders.remove("backup")
+model_folders.remove("loss")
 for model_name in model_folders:
     for model_index, running_time in enumerate(os.listdir(os.path.join('models', model_name)), 1):
         base_path = os.path.join("models", model_name, running_time)
         checkpoint_list = os.listdir(os.path.join(base_path, "checkpoints"))
         models.append({
-            'label': model_name + '-' + str(model_index),
+            'label': model_name + '-' + running_time,
             'value': os.path.join(base_path, 'checkpoints', checkpoint_list[-1])
         })
+        # for checkpoint in checkpoint_list:
+        #     models.append({
+        #         'label': model_name + '-' + running_time + '-' + checkpoint,
+        #         'value': os.path.join(base_path, 'checkpoints', checkpoint)
+        #     })
 
 app.layout = html.Div(children=[
     html.H1('Greenland Glacier surface mass balance model', style={'text-align': 'center'}),
@@ -71,7 +77,7 @@ app.layout = html.Div(children=[
             dcc.Dropdown(
                 options=models,
                 id='model_selected',
-                value=models[-1]['value'],
+                value=models[0]['value'],
                 style={'width': '100%'}
             ),
         ], style={'float': 'left', 'width': '30%'}),
@@ -185,4 +191,4 @@ def change_comparison_plot(model_path):
 
 
 if __name__ == '__main__':
-    app.run_server(host="localhost", port=12345)
+    app.run_server(host="0.0.0.0", port=12345)

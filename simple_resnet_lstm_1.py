@@ -23,11 +23,10 @@ def getModel(name):
 
     x = concatenate([input_x2, input_x3, input_x4, input_x1_1, input_x1_2, input_x1_3], axis=1)
 
-    cnn_1 = ResidualBlock(x, filters=8, kernel_size=3, strides=(1, 1), padding='same', shortcut=True)
-    cnn_2 = ResidualBlock(cnn_1, filters=8, kernel_size=3, strides=(1, 1), padding='same', shortcut=True)
-    cnn_3 = ResidualBlock(cnn_2, filters=8, kernel_size=3, strides=(1, 1), padding='same', shortcut=True)
+    for _ in range(8):
+        x = ResidualBlock(x, filters=8, kernel_size=3, strides=(1, 1), padding='same', shortcut=True)
 
-    pool = MaxPooling2D(pool_size=(2, 2))(cnn_3)
+    pool = MaxPooling2D(pool_size=(2, 2))(x)
 
     flattened = Flatten()(pool)
     x = tf.expand_dims(flattened, -1)
@@ -43,4 +42,4 @@ if __name__ == '__main__':
     from utils import train_model
 
     model = getModel(path_name)
-    train_model(model, epoch=2000, loss='mse', optimizer='rmsprop', test_size=7, random_state=42, matrics=['mse'])
+    train_model(model, epoch=500, loss='mse', optimizer='rmsprop', test_size=7, random_state=42, matrics=['mse'])
