@@ -42,13 +42,26 @@ for y in range(len(smb)):
     })
     feature_1d = pd.concat([feature_1d, df_1d], axis=0)
 
+    for i in range(height):
+        df = pd.DataFrame({
+            'year': [y + year_min] * 12,
+            'month': month_range,
+            'height': [i * 100 + 100] * 12,
+            'humidity': np.squeeze(humidity[y, i, :, :], -1),
+            'pressure': np.squeeze(pressure[y, i, :, :], -1),
+            'temperature': np.squeeze(temperature[y, i, :, :], -1)})
+        feature_2d = pd.concat([feature_2d, df], axis=0)
 models = []
-for model_name in os.listdir('models'):
+model_folders = os.listdir("models")
+model_folders.remove("backup")
+for model_name in model_folders:
     for model_index, running_time in enumerate(os.listdir(os.path.join('models', model_name)), 1):
-        for model_sub_index, checkpoint in enumerate(
-                os.listdir(os.path.join('models', model_name, running_time, 'checkpoints')), 1):
-            models.append({'label': model_name + '-' + str(model_index) + '-' + str(model_sub_index),
-                           'value': os.path.join('models', model_name, running_time, 'checkpoints', checkpoint)})
+        base_path = os.path.join("models", model_name, running_time)
+        checkpoint_list = os.listdir(os.path.join(base_path, "checkpoints"))
+        models.append({
+            'label': model_name + '-' + str(model_index),
+            'value': os.path.join(base_path, 'checkpoints', checkpoint_list[-1])
+        })
 
 app.layout = html.Div(children=[
     html.H1('Greenland Glacier surface mass balance model', style={'text-align': 'center'}),
@@ -76,6 +89,7 @@ app.layout = html.Div(children=[
         dcc.Dropdown(
             options=year_range,
             id='year_range',
+            multi=True,
             value=year_range[-1]['value'], style={'width': '100%'}),
     ], style={'float': 'left', 'width': '15%'}),
     html.Div(children=[
@@ -112,29 +126,39 @@ def change_feature_plot(years):
     for year in years:
         df = feature_1d[feature_1d['year'] == year]
 
-        cloud_plot.add_trace(go.Scatter(x=df['month'], y=df['cloud'], mode='lines+markers'))
-        cloud_plot.update_layout(title=f'{year}-cloud')
+        cloud_plot.add_trace(go.Scatter(x=df['month'], y=df['cloud'], mode='lines+markers', name=f'{year}'))
+        cloud_plot.update_layout(title='Cloud')
         cloud_plot.update_xaxes(type='category', categoryorder='array')
 
-        wind_plot.add_trace(go.Scatter(x=df['month'], y=df['wind'], mode='lines+markers'))
-        wind_plot.update_layout(title=f'{year}-wind')
+        wind_plot.add_trace(go.Scatter(x=df['month'], y=df['wind'], mode='lines+markers', name=f'{year}'))
+        wind_plot.update_layout(title='Wind')
         wind_plot.update_xaxes(type='category', categoryorder='array')
 
-        precipitation_plot.add_trace(go.Scatter(x=df['month'], y=df['precipitation'], mode='lines+markers'))
-        precipitation_plot.update_layout(title=f'{year}-precipitation')
+        precipitation_plot.add_trace(go.Scatter(x=df['month'], y=df['precipitation'], mode='lines+markers',
+                                                name=f'{year}'))
+        precipitation_plot.update_layout(title='Precipitation')
         precipitation_plot.update_xaxes(type='category', categoryorder='array')
 
-        humidity_plot.add_trace(go.Surface(x=np.arange(1, 13), y=np.arange(40) * 100 + 100,
-                                           z=np.squeeze(humidity[year - year_min], -1)))
-        humidity_plot.update_layout(title=f'{year}-humidity')
+        df_2d = feature_2d[feature_2d['year'] == year]
 
-        pressure_plot.add_trace(go.Surface(x=np.arange(1, 13), y=np.arange(40) * 100 + 100,
-                                           z=np.squeeze(pressure[year - year_min], -1)))
-        pressure_plot.update_layout(title=f'{year}-pressure')
+        humidity_plot.add_trace(go.Scatter3d(x=df_2d['month'], y=df_2d['height'], z=df_2d['humidity'],
+                                             mode='markers', name=f'{year}',
+                                             marker=dict(size=3, color=df_2d['humidity'], colorscale='Viridis',
+                                                         opacity=0.8)))
+        humidity_plot.update_layout(title='Humidity')
 
-        temperature_plot.add_trace(go.Surface(x=np.arange(1, 13), y=np.arange(40) * 100 + 100,
-                                              z=np.squeeze(temperature[year - year_min], -1)))
-        temperature_plot.update_layout(title=f'{year}-temperature')
+        pressure_plot.add_trace(go.Scatter3d(x=df_2d['month'], y=df_2d['height'], z=df_2d['pressure'],
+                                             mode='markers', name=f'{year}',
+                                             marker=dict(size=3, color=df_2d['pressure'], colorscale='Viridis',
+                                                         opacity=0.8)))
+        pressure_plot.update_layout(title='Pressure')
+
+        temperature_plot.add_trace(go.Scatter3d(x=df_2d['month'], y=df_2d['height'], z=df_2d['temperature'],
+                                                mode='markers', name=f'{year}',
+                                                marker=dict(size=3, color=df_2d['temperature'], colorscale='Viridis',
+                                                            opacity=0.8)))
+        temperature_plot.update_layout(title='Temperature')
+
     cloud_plot.update_layout(autosize=True, margin=dict(t=30, b=20, l=20, r=20))
     wind_plot.update_layout(autosize=True, margin=dict(t=30, b=20, l=20, r=20))
     precipitation_plot.update_layout(autosize=True, margin=dict(t=30, b=20, l=20, r=20))
@@ -161,4 +185,4 @@ def change_comparison_plot(model_path):
 
 
 if __name__ == '__main__':
-    app.run_server(host='0.0.0.0')
+    app.run_server(host="localhost", port=12345)
