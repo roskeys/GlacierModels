@@ -35,11 +35,11 @@ def load_data(*paths):
     smb = None
     for df in dataFrames:
         if df.shape[1] == 15:
-            data.append(np.expand_dims(load_2d_array(df, year_range), axis=-1))
+            data.append(np.expand_dims(load_2d_array(df, year_range), axis=-1).astype(np.float))
         elif df.shape[1] == 14:
-            data.append(load_1d_array(df, year_range))
+            data.append(load_1d_array(df, year_range).astype(np.float))
         elif df.shape[1] == 3:
-            smb = load_smb_array(df, year_range)
+            smb = load_smb_array(df, year_range.astype(np.float))
     return data, smb
 
 

@@ -7,7 +7,7 @@ from tensorflow.keras.layers import Dense, Dropout, Flatten, concatenate
 class BaseLineModel(Model):
     def __init__(self, name):
         super(BaseLineModel, self).__init__()
-        self.name = name
+        self.model_name = name
 
     def call(self, inputs, training=None, mask=None):
         (input_x1, input_x2, input_x3, input_x4, input_x5, input_x6) = inputs
