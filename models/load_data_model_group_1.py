@@ -39,7 +39,7 @@ def load_data(*paths):
         elif df.shape[1] == 14:
             data.append(load_1d_array(df, year_range).astype(np.float))
         elif df.shape[1] == 3:
-            smb = load_smb_array(df, year_range.astype(np.float))
+            smb = load_smb_array(df, year_range).astype(np.float)
     return data, smb
 
 

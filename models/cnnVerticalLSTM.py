@@ -4,7 +4,6 @@ from tensorflow.keras.activations import relu
 from tensorflow.keras.layers import Dense, Dropout, LeakyReLU, LSTM, Conv2D, Flatten, concatenate
 
 
-@tf.function
 def getModel(name):
     # a training example is one dimensional vector 36 is the size
     input_x1 = Input(shape=(12,), name="cloud")

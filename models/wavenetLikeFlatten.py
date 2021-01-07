@@ -4,7 +4,6 @@ from tensorflow.keras.activations import relu
 from tensorflow.keras.layers import Dense, Conv1D, Flatten, Dropout, LSTM, concatenate
 
 
-@tf.function
 def getModel(name):
     # a training example is one dimensional vector 36 is the size
     input_x1 = Input(shape=(12,), name="cloud")
@@ -21,8 +20,20 @@ def getModel(name):
         [Flatten()(input_x1), Flatten()(input_x2), Flatten()(input_x3),
          Flatten()(input_x4), Flatten()(input_x5), Flatten()(input_x6)])
     x = tf.expand_dims(x, -1)
-    for _ in range(10):
-        x = Conv1D(16, kernel_size=2, padding='valid', strides=2, activation=relu)(x)
+
+    # 10 layer of conv 1D with kernel size 2
+    x = Conv1D(16, kernel_size=2, padding='valid', strides=2, activation=relu)(x)
+    x = Conv1D(16, kernel_size=2, padding='valid', strides=2, activation=relu)(x)
+    x = Conv1D(16, kernel_size=2, padding='valid', strides=2, activation=relu)(x)
+    x = Conv1D(16, kernel_size=2, padding='valid', strides=2, activation=relu)(x)
+    x = Conv1D(16, kernel_size=2, padding='valid', strides=2, activation=relu)(x)
+
+    x = Conv1D(16, kernel_size=2, padding='valid', strides=2, activation=relu)(x)
+    x = Conv1D(16, kernel_size=2, padding='valid', strides=2, activation=relu)(x)
+    x = Conv1D(16, kernel_size=2, padding='valid', strides=2, activation=relu)(x)
+    x = Conv1D(16, kernel_size=2, padding='valid', strides=2, activation=relu)(x)
+    x = Conv1D(16, kernel_size=2, padding='valid', strides=2, activation=relu)(x)
+
     x = Flatten()(x)
     x = tf.expand_dims(x, -1)
     x = LSTM(128)(x)

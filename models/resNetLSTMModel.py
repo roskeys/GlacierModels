@@ -4,7 +4,6 @@ from components.ResNet import ResidualBlock
 from tensorflow.keras.layers import Dense, LSTM, LeakyReLU, MaxPooling2D, Flatten, concatenate
 
 
-@tf.function
 def getModel(name):
     # a training example is one dimensional vector 36 is the size
     input_x1 = Input(shape=(12,), name="cloud")
@@ -21,8 +20,17 @@ def getModel(name):
     input_x6 = Input(shape=(40, 12, 1), name="Temperature")
 
     x = concatenate([input_x1_1, input_x1_2, input_x1_3, input_x4, input_x5, input_x6], axis=1)
-    for _ in range(8):
-        x = ResidualBlock(x, filters=8, kernel_size=3, strides=(1, 1), padding='same', shortcut=True)
+    # 8 layer residule block
+    x = ResidualBlock(x, filters=8, kernel_size=3, strides=(1, 1), padding='same', shortcut=True)
+    x = ResidualBlock(x, filters=8, kernel_size=3, strides=(1, 1), padding='same', shortcut=True)
+    x = ResidualBlock(x, filters=8, kernel_size=3, strides=(1, 1), padding='same', shortcut=True)
+    x = ResidualBlock(x, filters=8, kernel_size=3, strides=(1, 1), padding='same', shortcut=True)
+
+    x = ResidualBlock(x, filters=8, kernel_size=3, strides=(1, 1), padding='same', shortcut=True)
+    x = ResidualBlock(x, filters=8, kernel_size=3, strides=(1, 1), padding='same', shortcut=True)
+    x = ResidualBlock(x, filters=8, kernel_size=3, strides=(1, 1), padding='same', shortcut=True)
+    x = ResidualBlock(x, filters=8, kernel_size=3, strides=(1, 1), padding='same', shortcut=True)
+
     pool = MaxPooling2D(pool_size=(2, 2))(x)
     flattened = Flatten()(pool)
     flattened = tf.expand_dims(flattened, -1)
