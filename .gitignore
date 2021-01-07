@@ -1,0 +1,11 @@
+saved_models/
+__pycache__/
+backups/
+backup/
+.idea/
+venv/
+.ipynb_checkpoints
+*test.py
+.cache
+*.iml
+*.xml
