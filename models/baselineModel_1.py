@@ -1,8 +1,3 @@
-import os
-import sys
-
-sys.path.append("..")
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 from tensorflow.keras import Model, Input
 from tensorflow.keras.activations import relu, tanh
 from tensorflow.keras.layers import Dense, Dropout, Flatten, concatenate
@@ -47,6 +42,11 @@ def getModel(name):
 
 
 if __name__ == '__main__':
+    import os
+    import sys
+
+    sys.path.append("..")
+    os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
     path_name = os.path.basename(sys.argv[0])[:-3]
     from utils import train_model
     from load_data_model_group_1 import load_data, train_test_split

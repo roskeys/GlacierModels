@@ -1,11 +1,8 @@
 import os
 import sys
 
-sys.path.append("models")
+sys.path.insert(0, os.path.join(os.path.abspath("."), "models"))
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
-import tensorflow as tf
-
-tf.random.set_seed(1024)
 import importlib
 from utils import train_model
 from models.load_data_model_group_1 import load_data, train_test_split
