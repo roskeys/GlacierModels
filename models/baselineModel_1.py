@@ -1,8 +1,44 @@
+import tensorflow as tf
 from tensorflow.keras import Model, Input
 from tensorflow.keras.activations import relu, tanh
 from tensorflow.keras.layers import Dense, Dropout, Flatten, concatenate
 
 
+class BaseLineModel(Model):
+    def __init__(self, name):
+        super(BaseLineModel, self).__init__()
+        self.name = name
+
+    def call(self, inputs, training=None, mask=None):
+        (input_x1, input_x2, input_x3, input_x4, input_x5, input_x6) = inputs
+
+        input_x_1 = concatenate([input_x1, input_x2, input_x3], axis=1)
+        nn_1 = Dense(36, activation=relu)(input_x_1)
+        nn_1 = Dropout(0.5)(nn_1)
+
+        # ann layer 1 branch 1
+        nn_2 = Flatten()(input_x4)
+        nn_2 = Dense(36, activation=relu)(nn_2)
+        nn_2 = Dropout(0.5)(nn_2)
+        # ann layer 1 branch 2
+        nn_3 = Flatten()(input_x5)
+        nn_3 = Dense(36, activation=relu)(nn_3)
+        nn_3 = Dropout(0.5)(nn_3)
+        # ann layer 1 branch 3
+        nn_4 = Flatten()(input_x6)
+        nn_4 = Dense(36, activation=relu)(nn_4)
+        nn_4 = Dropout(0.5)(nn_4)
+
+        # ann concat branches
+        nn_concat = concatenate([nn_1, nn_2, nn_3, nn_4])
+
+        # joint two models
+        dense_1 = Dense(32, activation=tanh)(nn_concat)
+        pred = Dense(1)(dense_1)
+        return pred
+
+
+@tf.function
 def getModel(name):
     # a training example is one dimensional vector 36 is the size
     input_x1 = Input(shape=(12,), name="cloud")
@@ -60,6 +96,7 @@ if __name__ == '__main__':
         "../data/MITTARFIK NARSARSUAQ/mean_humidity.csv",
         "../data/MITTARFIK NARSARSUAQ/mean_pressure.csv"])
     x_train, x_test, y_train, y_test = train_test_split(x_all, y_all, test_size=7)
-    model = getModel(path_name)
+    # model = getModel(path_name)
+    model = BaseLineModel(path_name)
     train_model(model, epoch=2000, data=(x_train, x_test, y_train, y_test, x_all, y_all),
                 loss='mse', optimizer='rmsprop', save_best_only=True, matrics=['mse'])
