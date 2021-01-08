@@ -3,6 +3,7 @@ import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 import pickle
+import numpy as np
 from utils import load_check_point, plot_history, predict_and_plot
 
 saved_model_base_path = "saved_models"
@@ -27,10 +28,18 @@ for model_name in model_folders:
         base_path = os.path.join(saved_model_base_path, model_name, running_time)
 
         with open(os.path.join(base_path, "data.pickle"), 'rb') as f:
-            (x, y) = pickle.load(f)
+            (x_train, x_test, y_train, y_test) = pickle.load(f)
+        x = []
+        if isinstance(x_train, list) or isinstance(x_train, tuple):
+            for x1, x2 in zip(x_train, x_test):
+                x.append(np.concatenate([x1, x2], axis=0))
+        else:
+            x = np.concatenate([x_train, x_test], axis=0)
+        y = np.concatenate([y_train, y_test])
+        test_size = len(y_test)
         model = load_check_point(
             os.path.join(base_path, "saved_checkpoints", os.listdir(os.path.join(base_path, "saved_checkpoints"))[-1]))
-        pred_and_actual_plot = predict_and_plot(model, x, y, show=show)
+        pred_and_actual_plot = predict_and_plot(model, x, y, test_size=test_size, show=show)
         pred_and_actual_plot.savefig(
             os.path.join(saved_model_base_path, "PredictedvsActual", f"{model_name}_Predicted_and_Actual.png"))
         with open(os.path.join(base_path, "history.pickle"), 'rb') as f:

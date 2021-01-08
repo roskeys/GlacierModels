@@ -55,5 +55,5 @@ if __name__ == '__main__':
         "../data/MITTARFIK NARSARSUAQ/mean_pressure.csv"])
     x_train, x_test, y_train, y_test = train_test_split(x_all, y_all, test_size=7)
     model = getModel(path_name)
-    train_model(model, epoch=10, data=(x_train, x_test, y_train, y_test, x_all, y_all),
+    train_model(model, epoch=1, data=(x_train, x_test, y_train, y_test),
                 loss='mse', optimizer='rmsprop', save_best_only=True, matrics=['mse'])

@@ -1,8 +1,7 @@
 data/OriginData/
 saved_models/
 __pycache__/
-backups/
-backup/
+backup*
 .idea/
 venv/
 .ipynb_checkpoints

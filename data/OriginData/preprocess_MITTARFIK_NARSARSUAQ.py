@@ -42,13 +42,13 @@ def load_2d_data(dataframe):
 
 
 if __name__ == '__main__':
-    load_1d_data(pd.read_csv("mean_cloud.csv")).to_csv("../MITTARFIK NARSARSUAQ/mean_cloud.csv")
-    load_1d_data(pd.read_csv("mean_wind.csv")).to_csv("../MITTARFIK NARSARSUAQ/mean_wind.csv")
-    load_1d_data(pd.read_csv("monthly_total_precipitation.csv")).to_csv(
+    load_1d_data(pd.read_csv("MITTARFIK NARSARSUAQ/mean_cloud.csv")).to_csv("../MITTARFIK NARSARSUAQ/mean_cloud.csv")
+    load_1d_data(pd.read_csv("MITTARFIK NARSARSUAQ/mean_wind.csv")).to_csv("../MITTARFIK NARSARSUAQ/mean_wind.csv")
+    load_1d_data(pd.read_csv("MITTARFIK NARSARSUAQ/monthly_total_precipitation.csv")).to_csv(
         "../MITTARFIK NARSARSUAQ/mean_precipitation.csv")
-    load_2d_data(pd.read_csv("Temp_fill.csv")).to_csv("../MITTARFIK NARSARSUAQ/mean_temperature.csv")
-    load_2d_data(pd.read_csv("CalHum_std_fill.csv.csv")).to_csv("../MITTARFIK NARSARSUAQ/mean_humidity.csv")
-    load_2d_data(pd.read_csv("Pressure_fill.csv")).to_csv("../MITTARFIK NARSARSUAQ/mean_pressure.csv")
-    smb = pd.read_csv("QAJUUTTAP_SERMIA_dm.csv")
+    load_2d_data(pd.read_csv("MITTARFIK NARSARSUAQ/Temp_fill.csv")).to_csv("../MITTARFIK NARSARSUAQ/mean_temperature.csv")
+    load_2d_data(pd.read_csv("MITTARFIK NARSARSUAQ/CalHum_std_fill.csv.csv")).to_csv("../MITTARFIK NARSARSUAQ/mean_humidity.csv")
+    load_2d_data(pd.read_csv("MITTARFIK NARSARSUAQ/Pressure_fill.csv")).to_csv("../MITTARFIK NARSARSUAQ/mean_pressure.csv")
+    smb = pd.read_csv("MITTARFIK NARSARSUAQ/QAJUUTTAP_SERMIA_dm.csv")
     smb.columns = ['year', 'SMB']
     smb.to_csv("../MITTARFIK NARSARSUAQ/smb.csv")

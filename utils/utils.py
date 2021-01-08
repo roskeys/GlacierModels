@@ -16,9 +16,9 @@ def train_model(model, epoch, data, loss='mse', optimizer='rmsprop', save_best_o
     if not os.path.exists(model_path):
         os.makedirs(os.path.join(model_path, "saved_checkpoints"))
     # save the original dataset
-    x_train, x_test, y_train, y_test, x_origin, y_origin = data
+    x_train, x_test, y_train, y_test = data
     with open(os.path.join(model_path, "data.pickle"), 'wb') as f:
-        pickle.dump((x_origin, y_origin), f)
+        pickle.dump((x_train, x_test, y_train, y_test), f)
     # keras build in model structure visualization
     plot_model(model, to_file=os.path.join(model_path, f"{model_name}.png"))
     model.compile(loss=loss, optimizer=optimizer, metrics=matrics)
@@ -35,7 +35,15 @@ def train_model(model, epoch, data, loss='mse', optimizer='rmsprop', save_best_o
     selected_file = os.listdir(os.path.join(model_path, "saved_checkpoints"))[-1]
     selected_model = load_check_point(os.path.join(model_path, "saved_checkpoints", selected_file))
     # plot the predicted value with the actual value
-    predict_and_plot(selected_model, x_origin, y_origin, show=show).savefig(
+    x_origin = []
+    if isinstance(x_train, list) or isinstance(x_train, tuple):
+        for x1, x2 in zip(x_train, x_test):
+            x_origin.append(np.concatenate([x1, x2], axis=0))
+    else:
+        x_origin = np.concatenate([x_train, x_test], axis=0)
+    y_origin = np.concatenate([y_train, y_test])
+    test_size = len(y_test)
+    predict_and_plot(selected_model, x_origin, y_origin, test_size=test_size, show=show).savefig(
         os.path.join(model_path, f"{model_name}_Predicted_and_Actual.png"))
     with open(os.path.join(model_path, "history.pickle"), 'wb') as f:
         pickle.dump(history.history, f)
@@ -53,11 +61,12 @@ def get_time_stamp():
 
 
 # plot the predicted and actual value
-def predict_and_plot(model, x, y, show=False):
+def predict_and_plot(model, x, y, test_size=7, show=False):
     pred = model.predict(x)
     plt.figure()
     plt.plot(pred[:, 0])
     plt.plot(y)
+    plt.vlines(len(y) - test_size, min(min(y), min(pred)), max(max(y), max(pred)), colors="r", linestyles="dashed")
     plt.title('Predicted and Actual')
     plt.ylabel('SMB')
     plt.xlabel('Year')

@@ -64,7 +64,15 @@ app.layout = html.Div(children=[
 def change_comparison_plot(model_path):
     model_base_path = get_base_path.search(model_path).groups()[0]
     with open(os.path.join(model_base_path, "data.pickle"), 'rb') as f:
-        x, smb = pickle.load(f)
+        (x_train, x_test, y_train, y_test) = pickle.load(f)
+    x = []
+    if isinstance(x_train, list) or isinstance(x_train, tuple):
+        for x1, x2 in zip(x_train, x_test):
+            x.append(np.concatenate([x1, x2], axis=0))
+    else:
+        x = np.concatenate([x_train, x_test], axis=0)
+    smb = np.concatenate([y_train, y_test])
+    test_index = len(y_train)
     data_size = len(smb)
     model = load_check_point(model_path)
     pred = model.predict(x)[:, 0]
@@ -72,6 +80,7 @@ def change_comparison_plot(model_path):
         go.Scatter(x=np.arange(data_size), y=pred, mode='lines+markers', name='Predicted'),
         go.Scatter(x=np.arange(data_size), y=smb, mode='lines+markers', name='Actual')
     ])
+    fig.add_vline(x=test_index, line_dash="dash", line_color="green", annotation_text="Predictions on test data")
     fig.update_layout(title='Comparison Between Predicted and Actual')
     fig.update_layout(autosize=True, margin=dict(t=50, b=20, l=20, r=20))
     return fig
