@@ -21,7 +21,11 @@ model_files = os.listdir("models")
 model_files.remove("components")
 model_files.remove("__init__.py")
 model_files.remove("load_data_model_group_1.py")
-model_files.remove("__pycache__")
+if "__pycache__" in model_files:
+    model_files.remove("__pycache__")
+
+if "saved_models" in model_files:
+    model_files.remove("saved_models")
 
 model_names = [n[:-3] for n in model_files]
 print(model_names)
@@ -29,5 +33,5 @@ for module_name in model_names:
     module = importlib.import_module(module_name)
     model = module.getModel(module_name)
     print("#" * 20, "Start to train model: ", module_name, "#" * 20)
-    train_model(model, epoch=1, data=(x_train, x_test, y_train, y_test, x_all, y_all),
+    train_model(model, epoch=2, data=(x_train, x_test, y_train, y_test, x_all, y_all),
                 loss='mse', optimizer='rmsprop', save_best_only=True, matrics=['mse'])

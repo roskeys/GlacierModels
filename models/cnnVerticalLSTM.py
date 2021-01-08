@@ -27,7 +27,7 @@ def getModel(name):
     # cnn layer 1 branch 3
     cnn_1_3 = Conv2D(4, kernel_size=(40, 1), padding='valid', activation=relu)(input_x6)
     # cnn concat branches
-    cnn_concat = concatenate([cnn_1_1, cnn_1_2, cnn_1_3], axis=-1)
+    cnn_concat = concatenate([cnn_1_1, cnn_1_2, cnn_1_3], axis=3)
     # cnn layer 2
     cnn_2 = Conv2D(3, kernel_size=(2, 1), padding='same', activation=relu, name="cnn_combine")(cnn_concat)
     flattened = Flatten()(cnn_2)

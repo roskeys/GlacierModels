@@ -22,17 +22,8 @@ def getModel(name):
     x = tf.expand_dims(x, -1)
 
     # 10 layer of conv 1D with kernel size 2
-    x = Conv1D(16, kernel_size=2, padding='valid', strides=2, activation=relu)(x)
-    x = Conv1D(16, kernel_size=2, padding='valid', strides=2, activation=relu)(x)
-    x = Conv1D(16, kernel_size=2, padding='valid', strides=2, activation=relu)(x)
-    x = Conv1D(16, kernel_size=2, padding='valid', strides=2, activation=relu)(x)
-    x = Conv1D(16, kernel_size=2, padding='valid', strides=2, activation=relu)(x)
-
-    x = Conv1D(16, kernel_size=2, padding='valid', strides=2, activation=relu)(x)
-    x = Conv1D(16, kernel_size=2, padding='valid', strides=2, activation=relu)(x)
-    x = Conv1D(16, kernel_size=2, padding='valid', strides=2, activation=relu)(x)
-    x = Conv1D(16, kernel_size=2, padding='valid', strides=2, activation=relu)(x)
-    x = Conv1D(16, kernel_size=2, padding='valid', strides=2, activation=relu)(x)
+    for _ in range(10):
+        x = Conv1D(16, kernel_size=2, padding='valid', strides=2, activation=relu)(x)
 
     x = Flatten()(x)
     x = tf.expand_dims(x, -1)

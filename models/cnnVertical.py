@@ -27,14 +27,13 @@ def getModel(name):
     # cnn layer 1 branch 3
     cnn_1_3 = Conv2D(4, kernel_size=(40, 1), padding='valid', activation=relu)(input_x6)
     # cnn concat branches
-    cnn_concat = concatenate([cnn_1_1, cnn_1_2, cnn_1_3], axis=-1)
+    cnn_concat = concatenate([cnn_1_1, cnn_1_2, cnn_1_3], axis=3)
     # cnn layer 2
     cnn_2 = Conv2D(3, kernel_size=(2, 1), padding='same', activation=relu, name="cnn_combine")(cnn_concat)
     flattened = Flatten()(cnn_2)
 
     # joint two models
     x = concatenate([nn_1, flattened])
-    x = tf.expand_dims(x, -1)
     fc = Dense(32)(x)
     fc = LeakyReLU()(Dense(24)(fc))
     pred = Dense(1)(fc)

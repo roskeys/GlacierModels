@@ -21,36 +21,12 @@ def getModel(name):
     x = concatenate([input_x1_1, input_x1_2, input_x1_3, input_x4, input_x5, input_x6], axis=1)
 
     # 18 layer residuale block
-    x = ResidualBlock(x, filters=16, kernel_size=3, strides=(1, 1), padding='same', shortcut=True)
-    x = ResidualBlock(x, filters=16, kernel_size=3, strides=(1, 1), padding='same', shortcut=True)
-    x = ResidualBlock(x, filters=16, kernel_size=3, strides=(1, 1), padding='same', shortcut=True)
-
-    x = ResidualBlock(x, filters=16, kernel_size=3, strides=(1, 1), padding='same', shortcut=True)
-    x = ResidualBlock(x, filters=16, kernel_size=3, strides=(1, 1), padding='same', shortcut=True)
-    x = ResidualBlock(x, filters=16, kernel_size=3, strides=(1, 1), padding='same', shortcut=True)
-
-    x = ResidualBlock(x, filters=16, kernel_size=3, strides=(1, 1), padding='same', shortcut=True)
-    x = ResidualBlock(x, filters=16, kernel_size=3, strides=(1, 1), padding='same', shortcut=True)
-    x = ResidualBlock(x, filters=16, kernel_size=3, strides=(1, 1), padding='same', shortcut=True)
-
-    x = ResidualBlock(x, filters=16, kernel_size=3, strides=(1, 1), padding='same', shortcut=True)
-    x = ResidualBlock(x, filters=16, kernel_size=3, strides=(1, 1), padding='same', shortcut=True)
-    x = ResidualBlock(x, filters=16, kernel_size=3, strides=(1, 1), padding='same', shortcut=True)
-
-    x = ResidualBlock(x, filters=16, kernel_size=3, strides=(1, 1), padding='same', shortcut=True)
-    x = ResidualBlock(x, filters=16, kernel_size=3, strides=(1, 1), padding='same', shortcut=True)
-    x = ResidualBlock(x, filters=16, kernel_size=3, strides=(1, 1), padding='same', shortcut=True)
-
-    x = ResidualBlock(x, filters=16, kernel_size=3, strides=(1, 1), padding='same', shortcut=True)
-    x = ResidualBlock(x, filters=16, kernel_size=3, strides=(1, 1), padding='same', shortcut=True)
-    x = ResidualBlock(x, filters=16, kernel_size=3, strides=(1, 1), padding='same', shortcut=True)
+    for _ in range(18):
+        x = ResidualBlock(x, filters=16, kernel_size=3, strides=(1, 1), padding='same', shortcut=True)
 
     # 5 layer conv2D with horizontal kernel
-    x = Conv2D(16, kernel_size=(2, 1), padding='valid', strides=(2, 1), activation=relu)(x)
-    x = Conv2D(16, kernel_size=(2, 1), padding='valid', strides=(2, 1), activation=relu)(x)
-    x = Conv2D(16, kernel_size=(2, 1), padding='valid', strides=(2, 1), activation=relu)(x)
-    x = Conv2D(16, kernel_size=(2, 1), padding='valid', strides=(2, 1), activation=relu)(x)
-    x = Conv2D(16, kernel_size=(2, 1), padding='valid', strides=(2, 1), activation=relu)(x)
+    for _ in range(5):
+        x = Conv2D(16, kernel_size=(2, 1), padding='valid', strides=(2, 1), activation=relu)(x)
 
     x = tf.expand_dims(Flatten()(x), -1)
     x = LSTM(128, activation=relu)(x)
