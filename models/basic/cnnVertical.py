@@ -1,4 +1,3 @@
-import tensorflow as tf
 from tensorflow.keras import Model, Input
 from tensorflow.keras.activations import relu
 from tensorflow.keras.layers import Dense, Dropout, LeakyReLU, LSTM, Conv2D, Flatten, concatenate
@@ -11,9 +10,9 @@ def getModel(name):
     input_x3 = Input(shape=(12,), name="wind")
 
     # a training example is 6 values a month,
-    input_x4 = Input(shape=(40, 12, 1), name="Humidity")
-    input_x5 = Input(shape=(40, 12, 1), name="Pressure")
-    input_x6 = Input(shape=(40, 12, 1), name="Temperature")
+    input_x4 = Input(shape=(41, 12, 1), name="Humidity")
+    input_x5 = Input(shape=(41, 12, 1), name="Pressure")
+    input_x6 = Input(shape=(41, 12, 1), name="Temperature")
 
     # nn model
     input_x_1 = concatenate([input_x1, input_x2, input_x3], axis=1)
@@ -21,11 +20,11 @@ def getModel(name):
     nn_1 = Dropout(0.5)(nn_1)
 
     # cnn layer 1 branch 1
-    cnn_1_1 = Conv2D(4, kernel_size=(1, 12), padding='valid', activation=relu)(input_x4)
+    cnn_1_1 = Conv2D(4, kernel_size=(41, 1), padding='valid', activation=relu)(input_x4)
     # cnn layer 1 branch 2
-    cnn_1_2 = Conv2D(4, kernel_size=(1, 12), padding='valid', activation=relu)(input_x5)
+    cnn_1_2 = Conv2D(4, kernel_size=(41, 1), padding='valid', activation=relu)(input_x5)
     # cnn layer 1 branch 3
-    cnn_1_3 = Conv2D(4, kernel_size=(1, 12), padding='valid', activation=relu)(input_x6)
+    cnn_1_3 = Conv2D(4, kernel_size=(41, 1), padding='valid', activation=relu)(input_x6)
     # cnn concat branches
     cnn_concat = concatenate([cnn_1_1, cnn_1_2, cnn_1_3], axis=3)
     # cnn layer 2
@@ -34,9 +33,8 @@ def getModel(name):
 
     # joint two models
     x = concatenate([nn_1, flattened])
-    x = tf.expand_dims(x, -1)
-    lstm = LSTM(32)(x)
-    fc = LeakyReLU()(Dense(24)(lstm))
+    fc = Dense(32)(x)
+    fc = LeakyReLU()(Dense(24)(fc))
     pred = Dense(1)(fc)
     m = Model(inputs=[input_x1, input_x2, input_x3, input_x4, input_x5, input_x6], outputs=pred, name=name)
     return m
@@ -50,7 +48,7 @@ if __name__ == '__main__':
     os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
     path_name = os.path.basename(sys.argv[0])[:-3]
     from utils import train_model
-    from load_data_model_group_1 import load_data, train_test_split
+    from load_data import load_data, train_test_split
 
     x_all, y_all = load_data(*[
         "../data/MITTARFIK NARSARSUAQ/smb.csv",

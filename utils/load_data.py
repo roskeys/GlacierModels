@@ -1,5 +1,9 @@
+import os
+import re
 import numpy as np
 import pandas as pd
+
+index_matcher = re.compile(".*?/(\d{5})/?")
 
 
 def load_1d_array(df, year_range):
@@ -58,6 +62,30 @@ def train_test_split(x, y, test_size=7, random_seed=None):
     y_train = y[:-test_size]
     y_test = y[-test_size:]
     return x_train, x_test, y_train, y_test
+
+
+def match_centroid(glacier_index, centroid_assignment):
+    centroid_map = {5: 'AASIAAT(EGEDESMINDE)', 1: 'DANMARKSHAVN', 2: 'ITTOQQORTOORMIIT',
+                    4: 'MITTARFIK_NARSARSUAQ', 3: 'TASIILAQ(AMMASSALIK)'}  # 'PITUFFIK',
+    line = centroid_assignment[centroid_assignment["NAME"].str.contains(glacier_index)]
+    if len(line) > 1:
+        line = line.head(1)
+    elif len(line) == 0:
+        return
+    return centroid_map[line["Central"].values[0]]
+
+
+def load_data_of_glacier(dmi8_path, igra_path, smb_path):
+    x, y = load_data(*[
+        smb_path,
+        os.path.join(dmi8_path, "cloud.csv"),
+        os.path.join(dmi8_path, "precipitation.csv"),
+        os.path.join(dmi8_path, "wind.csv"),
+        os.path.join(igra_path, "humidity.csv"),
+        os.path.join(igra_path, "pressure.csv"),
+        os.path.join(igra_path, "temperature.csv"),
+    ])
+    return x, y
 
 
 if __name__ == "__main__":

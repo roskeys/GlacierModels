@@ -30,7 +30,9 @@ def train_model(model, epoch, data, loss='mse', optimizer='rmsprop', save_best_o
     model.fit(x_train, y_train, validation_data=(x_test, y_test), callbacks=[history, tensorboard, checkpoints],
               epochs=epoch)
     # plot the history
-    plot_history(history.history, show=show).savefig(os.path.join(model_path, f"{model_name}_Training_Error.png"))
+    history_plot = plot_history(history.history, show=show)
+    history_plot.savefig(os.path.join(model_path, f"{model_name}_Training_Error.png"))
+    history_plot.close()
     # select the last model
     selected_file = os.listdir(os.path.join(model_path, "saved_checkpoints"))[-1]
     selected_model = load_check_point(os.path.join(model_path, "saved_checkpoints", selected_file))
@@ -43,8 +45,9 @@ def train_model(model, epoch, data, loss='mse', optimizer='rmsprop', save_best_o
         x_origin = np.concatenate([x_train, x_test], axis=0)
     y_origin = np.concatenate([y_train, y_test])
     test_size = len(y_test)
-    predict_and_plot(selected_model, x_origin, y_origin, test_size=test_size, show=show).savefig(
-        os.path.join(model_path, f"{model_name}_Predicted_and_Actual.png"))
+    predict_plot = predict_and_plot(selected_model, x_origin, y_origin, test_size=test_size, show=show)
+    predict_plot.savefig(os.path.join(model_path, f"{model_name}_Predicted_and_Actual.png"))
+    predict_plot.close()
     with open(os.path.join(model_path, "history.pickle"), 'wb') as f:
         pickle.dump(history.history, f)
 
