@@ -36,4 +36,6 @@ for glacier in os.listdir("data/DMI8_data"):
         model = module.getModel(f"{module_name}_{glacier}_{centroid}")
         print("#" * 20, "Start to train model: ", f"{module_name}_{glacier}_{centroid}", "#" * 20)
         train_model(model, epoch=10, data=(x_train, x_test, y_train, y_test),
-                    loss='mse', optimizer='rmsprop', save_best_only=True, matrics=['mse'])
+                    loss='mse', optimizer='rmsprop', save_best_only=True, metrics=['mse'])
+        break
+    break

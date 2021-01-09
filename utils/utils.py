@@ -5,12 +5,27 @@ import numpy as np
 import matplotlib.pyplot as plt
 from tensorflow.keras.utils import plot_model
 from tensorflow.keras.models import load_model
-from tensorflow.keras.callbacks import History, TensorBoard, ModelCheckpoint
+from tensorflow.keras.callbacks import History, TensorBoard, ModelCheckpoint, Callback
 
 
-def train_model(model, epoch, data, loss='mse', optimizer='rmsprop', save_best_only=True, matrics=None, show=False):
+class NBatchLogger(Callback):
+    def __init__(self, display):
+        super(Callback, self).__init__()
+        self.seen = 0
+        self.display = display
+
+    def on_batch_end(self, batch, logs=None):
+        if logs is None:
+            logs = {}
+        self.seen += logs.get('size', 0)
+        if self.seen % self.display == 0:
+            # you can access loss, accuracy in self.params['metrics']
+            print('\n{}/{} - loss ....\n'.format(self.seen, self.params['nb_sample']))
+
+
+def train_model(model, epoch, data, loss='mse', optimizer='rmsprop', save_best_only=True, metrics=None, show=False):
     # evaluation matrix
-    matrics = ['mse'] if matrics is None else matrics
+    metrics = ['mse'] if metrics is None else metrics
     model_name = model.name
     model_path = os.path.join(os.path.abspath(os.curdir), "saved_models", model_name, get_time_stamp())
     if not os.path.exists(model_path):
@@ -21,13 +36,14 @@ def train_model(model, epoch, data, loss='mse', optimizer='rmsprop', save_best_o
         pickle.dump((x_train, x_test, y_train, y_test), f)
     # keras build in model structure visualization
     plot_model(model, to_file=os.path.join(model_path, f"{model_name}.png"))
-    model.compile(loss=loss, optimizer=optimizer, metrics=matrics)
+    model.compile(loss=loss, optimizer=optimizer, metrics=metrics)
     # add keras callbacks save history, tensorboard record and checkpoints
     history = History()
     tensorboard = TensorBoard(log_dir=os.path.join(model_path, "logs"), update_freq="epoch")
     checkpoints = ModelCheckpoint(os.path.join(model_path, "saved_checkpoints", f"weights-{epoch:02d}.hdf5"),
                                   monitor='val_loss', mode='auto', save_freq='epoch', save_best_only=save_best_only)
-    model.fit(x_train, y_train, validation_data=(x_test, y_test), callbacks=[history, tensorboard, checkpoints],
+
+    model.fit(x_train, y_train, validation_data=(x_test, y_test), callbacks=[history, tensorboard, checkpoints, ],
               epochs=epoch)
     # plot the history
     history_plot = plot_history(history.history, show=show)
