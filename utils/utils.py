@@ -3,6 +3,7 @@ import time
 import pickle
 import numpy as np
 import matplotlib.pyplot as plt
+from utils.load_data import concatenate_data
 from tensorflow.keras.utils import plot_model
 from tensorflow.keras.models import load_model
 from tensorflow.keras.callbacks import History, TensorBoard, ModelCheckpoint, Callback
@@ -53,13 +54,7 @@ def train_model(model, epoch, data, loss='mse', optimizer='rmsprop', save_best_o
     selected_file = os.listdir(os.path.join(model_path, "saved_checkpoints"))[-1]
     selected_model = load_check_point(os.path.join(model_path, "saved_checkpoints", selected_file))
     # plot the predicted value with the actual value
-    x_origin = []
-    if isinstance(x_train, list) or isinstance(x_train, tuple):
-        for x1, x2 in zip(x_train, x_test):
-            x_origin.append(np.concatenate([x1, x2], axis=0))
-    else:
-        x_origin = np.concatenate([x_train, x_test], axis=0)
-    y_origin = np.concatenate([y_train, y_test])
+    x_origin, y_origin = concatenate_data(x_train, y_train, x_test, y_test)
     test_size = len(y_test)
     predict_plot = predict_and_plot(selected_model, x_origin, y_origin, test_size=test_size, show=show)
     predict_plot.savefig(os.path.join(model_path, f"{model_name}_Predicted_and_Actual.png"))

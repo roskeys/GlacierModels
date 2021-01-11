@@ -2,6 +2,8 @@ import os
 import pickle
 import re
 
+from utils.load_data import concatenate_data
+
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 import dash
@@ -65,13 +67,7 @@ def change_comparison_plot(model_path):
     model_base_path = get_base_path.search(model_path).groups()[0]
     with open(os.path.join(model_base_path, "data.pickle"), 'rb') as f:
         (x_train, x_test, y_train, y_test) = pickle.load(f)
-    x = []
-    if isinstance(x_train, list) or isinstance(x_train, tuple):
-        for x1, x2 in zip(x_train, x_test):
-            x.append(np.concatenate([x1, x2], axis=0))
-    else:
-        x = np.concatenate([x_train, x_test], axis=0)
-    smb = np.concatenate([y_train, y_test])
+    x, smb = concatenate_data(x_train, y_train, x_test, y_test)
     test_index = len(y_train)
     data_size = len(smb)
     model = load_check_point(model_path)
@@ -87,4 +83,4 @@ def change_comparison_plot(model_path):
 
 
 if __name__ == '__main__':
-    app.run_server(host="0.0.0.0")
+    app.run_server(host="0.0.0.0", port=12345)

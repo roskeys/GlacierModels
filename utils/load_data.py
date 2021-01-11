@@ -88,6 +88,30 @@ def load_data_of_glacier(dmi8_path, igra_path, smb_path):
     return x, y
 
 
+def load_data_by_cluster(cluster_path, smb_path):
+    x, y = load_data(*[
+        smb_path,
+        os.path.join(cluster_path, "cloud.csv"),
+        os.path.join(cluster_path, "precipitation.csv"),
+        os.path.join(cluster_path, "wind.csv"),
+        os.path.join(cluster_path, "humidity.csv"),
+        os.path.join(cluster_path, "pressure.csv"),
+        os.path.join(cluster_path, "temperature.csv"),
+    ])
+    return x, y
+
+
+def concatenate_data(x1, y1, x2, y2):
+    x_concatenated = []
+    if isinstance(x1, list) or isinstance(x1, tuple):
+        for x_part1, x_part2 in zip(x1, x2):
+            x_concatenated.append(np.concatenate([x_part1, x_part2], axis=0))
+    else:
+        x_concatenated = np.concatenate([x1, x2], axis=0)
+    y_concatenated = np.concatenate([y1, y2])
+    return x_concatenated, y_concatenated
+
+
 if __name__ == "__main__":
     all_x, all_y = load_data(*[
         "../data/MITTARFIK NARSARSUAQ/smb.csv",
