@@ -129,13 +129,17 @@ def load_data_by_cluster(glacier_assignment_path, glacier_name, centroid_to_igra
     glacier_assignment = pd.read_csv(glacier_assignment_path)
     central = glacier_assignment[glacier_assignment['NAME'] == glacier_name]['Central'].values[0]
     igra_name = centroid_to_igra_map[central]
-    humidity_df = load_2d_data(pd.read_csv(os.path.join(igra_base_path, igra_name, "CalHum_std.csv")))
-    pressure_df = load_2d_data(pd.read_csv(os.path.join(igra_base_path, igra_name, "Pressure.csv")))
-    temperature_df = load_2d_data(pd.read_csv(os.path.join(igra_base_path, igra_name, "Temp.csv")))
-    cloud_df = load_1d_data(pd.read_csv(os.path.join(dmi_base_path, str(central), f"mean_cloud_{central}.csv")))
-    wind_df = load_1d_data(pd.read_csv(os.path.join(dmi_base_path, str(central), f"mean_wind_{central}.csv")))
+    print(os.path.join(igra_base_path, igra_name), os.path.join(dmi_base_path, str(central)))
+    humidity_df = load_2d_data(pd.read_csv(os.path.join(igra_base_path, igra_name, "CalHum_std.csv"), dtype=np.float64))
+    pressure_df = load_2d_data(pd.read_csv(os.path.join(igra_base_path, igra_name, "Pressure.csv"), dtype=np.float64))
+    temperature_df = load_2d_data(pd.read_csv(os.path.join(igra_base_path, igra_name, "Temp.csv"), dtype=np.float64))
+    cloud_df = load_1d_data(
+        pd.read_csv(os.path.join(dmi_base_path, str(central), f"mean_cloud_{central}.csv"), dtype=np.float64))
+    wind_df = load_1d_data(
+        pd.read_csv(os.path.join(dmi_base_path, str(central), f"mean_wind_{central}.csv"), dtype=np.float64))
     precipitation_df = load_1d_data(
-        pd.read_csv(os.path.join(dmi_base_path, str(central), f"monthly_total_precipitation_{central}.csv")))
+        pd.read_csv(os.path.join(dmi_base_path, str(central), f"monthly_total_precipitation_{central}.csv"),
+                    dtype=np.float64))
     dataframes = [smb_df, humidity_df, pressure_df, temperature_df, cloud_df, wind_df, precipitation_df]
     common_year_range = set(smb_df["year"])
     for df in dataframes[1:]:
@@ -149,6 +153,7 @@ def load_data_by_cluster(glacier_assignment_path, glacier_name, centroid_to_igra
         load_2d_array(pressure_df, common_year_range),
         load_2d_array(temperature_df, common_year_range)
     ]
+    print("Commmon year range:", common_year_range)
     return x_data_set, smb_array
 
 
@@ -156,10 +161,9 @@ if __name__ == "__main__":
     centroid_map = {5: 'AASIAAT(EGEDESMINDE)', 1: 'DANMARKSHAVN', 2: 'ITTOQQORTOORMIIT', 4: 'MITTARFIK_NARSARSUAQ',
                     3: 'TASIILAQ(AMMASSALIK)'}  # 'PITUFFIK',
 
-    x_all, y_all = load_data_by_cluster("../data/glacier_assignment.csv", "ILORLIIT-SERMINNGUAQ", centroid_map,
-                                        "../data/IGRA Archieves/", "../data/newDMI8_data",
-                                        "../data/smb_mass_change.csv")
-
+    x_all, y_all = load_data_by_cluster("../../Training_data/Glaicer_select.csv", "STORSTROMMEN", centroid_map,
+                                        "../../Training_data/IGRA Archieves/", "../../Training_data/DMI_data",
+                                        "../../Training_data/smb_mass_change.csv")
     for x in x_all:
-        print(x.shape)
-    print(y_all.shape)
+        print(x[0])
+    print(y_all)

@@ -9,27 +9,13 @@ from tensorflow.keras.models import load_model
 from tensorflow.keras.callbacks import History, TensorBoard, ModelCheckpoint, Callback
 
 
-class NBatchLogger(Callback):
-    def __init__(self, display):
-        super(Callback, self).__init__()
-        self.seen = 0
-        self.display = display
-
-    def on_batch_end(self, batch, logs=None):
-        if logs is None:
-            logs = {}
-        self.seen += logs.get('size', 0)
-        if self.seen % self.display == 0:
-            # you can access loss, accuracy in self.params['metrics']
-            print('\n{}/{} - loss ....\n'.format(self.seen, self.params['nb_sample']))
-
-
 def train_model(model, epoch, data, loss='mse', optimizer='rmsprop', save_best_only=True, metrics=None, show=False):
     # evaluation matrix
     metrics = ['mse'] if metrics is None else metrics
     model_name = model.name
     model_path = os.path.join(os.path.abspath(os.curdir), "saved_models", model_name, get_time_stamp())
     if not os.path.exists(model_path):
+        os.makedirs(model_path)
         os.makedirs(os.path.join(model_path, "saved_checkpoints"))
     # save the original dataset
     x_train, x_test, y_train, y_test = data
@@ -44,11 +30,11 @@ def train_model(model, epoch, data, loss='mse', optimizer='rmsprop', save_best_o
     checkpoints = ModelCheckpoint(os.path.join(model_path, "saved_checkpoints", f"weights-{epoch:02d}.hdf5"),
                                   monitor='val_loss', mode='auto', save_freq='epoch', save_best_only=save_best_only)
 
-    model.fit(x_train, y_train, validation_data=(x_test, y_test), callbacks=[history, tensorboard, checkpoints, ],
+    model.fit(x_train, y_train, validation_data=(x_test, y_test), callbacks=[history, tensorboard, checkpoints],
               epochs=epoch)
     # plot the history
     history_plot = plot_history(history.history, show=show)
-    history_plot.savefig(os.path.join(model_path, f"{model_name}_Training_Error.png"))
+    history_plot.savefig(os.path.join(model_path, f"{model_name}_loss.png"))
     history_plot.close()
     # select the last model
     selected_file = os.listdir(os.path.join(model_path, "saved_checkpoints"))[-1]
@@ -57,7 +43,7 @@ def train_model(model, epoch, data, loss='mse', optimizer='rmsprop', save_best_o
     x_origin, y_origin = concatenate_data(x_train, y_train, x_test, y_test)
     test_size = len(y_test)
     predict_plot = predict_and_plot(selected_model, x_origin, y_origin, test_size=test_size, show=show)
-    predict_plot.savefig(os.path.join(model_path, f"{model_name}_Predicted_and_Actual.png"))
+    predict_plot.savefig(os.path.join(model_path, f"{model_name}_value.png"))
     predict_plot.close()
     with open(os.path.join(model_path, "history.pickle"), 'wb') as f:
         pickle.dump(history.history, f)
