@@ -29,7 +29,7 @@ def load_1d_data(dataframe):
             data[i] = df_next_year.loc[df_next_year["month"] == i][feature_name].values
         try:
             df = pd.DataFrame(data)
-        except ValueError as e:
+        except ValueError or Exception as e:
             if str(e) == "arrays must all be same length":
                 continue
         output = pd.concat([output, df], ignore_index=True)
@@ -53,7 +53,7 @@ def load_2d_data(dataframe):
         data['height'] = np.arange(0, height) * 100
         try:
             df = pd.DataFrame(data)
-        except ValueError as e:
+        except ValueError or Exception as e:
             if str(e) == "arrays must all be same length":
                 continue
             elif str(e) == "Data must be 1-dimensional":
