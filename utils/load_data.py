@@ -125,7 +125,7 @@ def concatenate_data(x1, y1, x2, y2):
 
 def load_data_by_cluster(glacier_assignment_path, glacier_name, centroid_to_igra_map, igra_base_path, dmi_base_path,
                          smb_path):
-    smb_df = load_smb(glacier_name, pd.read_excel(smb_path))
+    smb_df = load_smb(glacier_name, pd.read_csv(smb_path))
     glacier_assignment = pd.read_csv(glacier_assignment_path)
     central = glacier_assignment[glacier_assignment['NAME'] == glacier_name]['Central'].values[0]
     igra_name = centroid_to_igra_map[central]
@@ -158,7 +158,7 @@ if __name__ == "__main__":
 
     x_all, y_all = load_data_by_cluster("../data/glacier_assignment.csv", "ILORLIIT-SERMINNGUAQ", centroid_map,
                                         "../data/IGRA Archieves/", "../data/newDMI8_data",
-                                        "../data/smb_mass_change.xlsx")
+                                        "../data/smb_mass_change.csv")
 
     for x in x_all:
         print(x.shape)
