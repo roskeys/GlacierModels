@@ -35,7 +35,7 @@ if train:
         x_train, x_test, y_train, y_test = train_test_split(x_all, y_all, test_size=test_size)
         for module_name in model_names:
             module = importlib.import_module(module_name)
-            model = module.getModel(f"{module_name}_{glacier}")
+            model = module.getModel(f"{module_name}_{glacier[:10]}")
             print("#" * 20, "Start to train model: ", f"{module_name}_{glacier[:10]}", "#" * 20)
             train_model(model, epoch=2, data=(x_train, x_test, y_train, y_test),
                         loss='mse', optimizer='rmsprop', save_best_only=True, metrics=['mse'])
