@@ -20,7 +20,10 @@ if "__pycache__" in model_files:
     model_files.remove("__pycache__")
 model_names = [n[:-3] for n in model_files]
 
-for glacier in pd.read_csv("data/glacier_assignment.csv")["NAME"].unique():
+glacier_df = pd.read_csv("data/smb_mass_change.csv")
+glacier_df = glacier_df[glacier_df["METHOD"] == "SMB"]
+
+for glacier in glacier_df["NAME"].unique():
     x_all, y_all = load_data_by_cluster("data/glacier_assignment.csv", glacier, centroid_map,
                                         "data/IGRA Archieves/", "data/newDMI8_data",
                                         "data/smb_mass_change.csv")
