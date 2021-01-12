@@ -65,7 +65,7 @@ def load_2d_data(dataframe):
 def load_smb(name, df):
     df = df[df["NAME"] == name]
     columns = df.filter(regex="\d{4}\.5").columns
-    columns = [int(year) for year in columns]
+    columns = [int(float(year)) for year in columns]
     sorted(columns)
     smb = pd.DataFrame()
     for year in columns:
