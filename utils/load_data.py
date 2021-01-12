@@ -69,7 +69,7 @@ def load_smb(name, df):
     sorted(columns)
     smb = pd.DataFrame()
     for year in columns:
-        smb = pd.concat([smb, pd.DataFrame({"year": year, "SMB": df[year + 0.5].values})])
+        smb = pd.concat([smb, pd.DataFrame({"year": year, "SMB": df[f"{year}.5"].values})])
     return smb
 
 
