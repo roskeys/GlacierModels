@@ -6,6 +6,7 @@ sys.path.insert(0, os.path.join(os.path.abspath("."), "models", "basic"))
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 import importlib
 import pandas as pd
+import numpy as np
 from utils import train_model
 from utils.load_data import train_test_split, load_data_by_cluster
 
@@ -24,6 +25,8 @@ for glacier in pd.read_csv("data/glacier_assignment.csv")["NAME"].unique():
                                         "data/IGRA Archieves/", "data/newDMI8_data",
                                         "data/smb_mass_change.xlsx")
     if len(y_all) < 25:
+        continue
+    if np.sum(np.power(y_all, 2)) < 0.1:
         continue
     test_size = int(len(y_all) * 0.2)
     x_train, x_test, y_train, y_test = train_test_split(x_all, y_all, test_size=test_size)
