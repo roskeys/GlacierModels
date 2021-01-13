@@ -49,6 +49,6 @@ for glacier in glaciers:
             test_size = int(data_size * 0.2)
             x_train, x_test, y_train, y_test = train_test_split(x_all, y_all, test_size=test_size)
             model_path = os.path.join("saved_models", model_path)
-            continue_train(model_path, epoch=epoch, data=(x_train, x_test, y_train, y_test),
+            continue_train(model_path, glacier[:10], epoch=epoch, data=(x_train, x_test, y_train, y_test),
                            loss='mse', optimizer='rmsprop', save_best_only=True, metrics=['mse'])
 print("Finished Training")
