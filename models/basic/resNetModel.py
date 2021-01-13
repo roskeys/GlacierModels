@@ -28,9 +28,9 @@ def getModel(name):
     x = AveragePooling2D(pool_size=(2, 2))(x)
 
     x = Conv2D(16, kernel_size=(3, 3), padding='same', activation=tanh)(x)
-    x = AveragePooling2D(pool_size=(2, 2))
+    x = AveragePooling2D(pool_size=(2, 2))(x)
     x = Conv2D(16, kernel_size=(3, 3), padding='same', activation=tanh)(x)
-    x = AveragePooling2D(pool_size=(2, 2))
+    x = AveragePooling2D(pool_size=(2, 2))(x)
 
     flattened = Flatten()(x)
     flattened = tf.expand_dims(flattened, -1)
