@@ -67,6 +67,11 @@ def predict_and_plot(model, x, y, test_size=7, show=False):
     plt.figure()
     plt.plot(pred)
     plt.plot(y)
+    loss = np.sum(np.power(pred - y, 2))
+    var = np.var(pred - y)
+    if loss < 0.5 and var < 0.002 and np.sum(np.abs(pred - y)) < 1:
+        with open("glaciers.txt", 'a') as f:
+            f.write(f"{model.name}, var{var}\n")
     min_y, max_y = min(min(y), min(pred)), max(max(y), max(pred))
     plt.vlines(len(y) - test_size, min_y, max_y, colors="r", linestyles="dashed")
     plt.title('Predicted and Actual')

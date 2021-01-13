@@ -33,7 +33,24 @@ if "__pycache__" in model_files:
     model_files.remove("__pycache__")
 model_names = [n[:-3] for n in model_files]
 glacier_df = pd.read_csv("../Training_data/Glaicer_select.csv")
-glaciers = glacier_df["NAME"].unique()
+glaciers = glacier_df[glacier_df["Distance"] < 120]
+
+final_df = pd.DataFrame()
+for i in range(1, 6):
+    central_i = glacier_df[glacier_df["Central"] == i].tail(3)
+    final_df = pd.concat([final_df, central_i], ignore_index=True)
+
+glaciers_set = final_df["NAME"].unique()
+glaciers = [
+    'JAKOBSHAVN_ISBRAE', 'DENDRITGLETSCHER', 'EQALORUTSIT_KILLIIT_SERMIAT', 'FENRISGLETSCHER', "SERMILIK",
+    "SIORALIK-ARSUK-QIPISAQQU",
+    "SORANERBRAEEN-EINAR_MIKKELSEN-HEINKEL-TVEGEGLETSCHER-PASTERZE", "STORSTROMMEN", "SW_NONAME1", "UKAASORSUAQ",
+    "AB_DRACHMANN_GLETSCHER_L_BISTRUP_BRAE", "ADMIRALTY_TREFORK_KRUSBR_BORGJKEL_PONY", "KIATTUUT-QOOQQUP",
+    "NAAJAT_SERMIAT", "SERMILIGAARSSUK_BRAE", "SYDBR", "HELHEIMGLETSCHER", "APUSEERAJIK", 'QAJUUTTAP_SERMIA',
+    'KNUD-RASMUSSEN', "MIDGARDGLETSCHER", 'BREDEGLETSJER', "GEIKIE2", "NIGERTULUUP_KATTILERTARPIA",
+]
+for g in glaciers_set:
+    glaciers.append(g)
 
 if train:
     for glacier in glaciers:
@@ -57,7 +74,7 @@ if train:
         else:
             raise Exception("Model groups not found")
         data_size = len(y_all)
-        if data_size < 16 or np.sum(np.power(y_all, 2)) < 0.1:
+        if data_size < 20 or np.sum(np.power(y_all, 2)) < 0.1:
             continue
         else:
             for x in x_all:
@@ -72,6 +89,5 @@ if train:
                 train_model(model, epoch=epoch, data=(x_train, x_test, y_train, y_test),
                             loss='mse', optimizer='rmsprop', save_best_only=True, metrics=['mse'])
     print("Finished Training")
-
 if plot:
     load_all_and_plot_all("saved_models", show=False)
