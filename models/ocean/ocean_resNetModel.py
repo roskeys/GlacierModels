@@ -2,7 +2,7 @@ import tensorflow as tf
 from tensorflow.keras import Model, Input
 from tensorflow.keras.activations import tanh
 from models.components.ResNet import ResidualBlock
-from tensorflow.keras.layers import Dense, LSTM, Conv2D, LeakyReLU, AveragePooling2D, Flatten, concatenate
+from tensorflow.keras.layers import Dense, Conv2D, AveragePooling2D, Flatten, concatenate
 
 
 def getModel(name):
@@ -19,8 +19,9 @@ def getModel(name):
     input_x4 = Input(shape=(41, 12, 1), name="Humidity")
     input_x5 = Input(shape=(41, 12, 1), name="Pressure")
     input_x6 = Input(shape=(41, 12, 1), name="Temperature")
+    input_x7 = Input(shape=(9, 12, 1), name="Ocean")
 
-    x = concatenate([input_x1_1, input_x1_2, input_x1_3, input_x4, input_x5, input_x6], axis=1)
+    x = concatenate([input_x1_1, input_x1_2, input_x1_3, input_x4, input_x5, input_x6, input_x7], axis=1)
 
     # 8 layer residule block
     for _ in range(8):
@@ -28,14 +29,14 @@ def getModel(name):
     x = AveragePooling2D(pool_size=(2, 2))(x)
 
     x = Conv2D(16, kernel_size=(3, 3), padding='same', activation=tanh)(x)
-    x = AveragePooling2D(pool_size=(2, 2))
+    x = AveragePooling2D(pool_size=(2, 2))(x)
     x = Conv2D(16, kernel_size=(3, 3), padding='same', activation=tanh)(x)
-    x = AveragePooling2D(pool_size=(2, 2))
+    x = AveragePooling2D(pool_size=(2, 2))(x)
 
     flattened = Flatten()(x)
     flattened = tf.expand_dims(flattened, -1)
-    lstm = LSTM(64)(flattened)
-    fc = LeakyReLU()(Dense(32)(lstm))
+    fc = Dense(64)(flattened)
+    fc = Dense(32)(fc)
     pred = Dense(1)(fc)
-    m = Model(inputs=[input_x1, input_x2, input_x3, input_x4, input_x5, input_x6], outputs=pred, name=name)
+    m = Model(inputs=[input_x1, input_x2, input_x3, input_x4, input_x5, input_x6, input_x7], outputs=pred, name=name)
     return m

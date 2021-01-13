@@ -13,6 +13,7 @@ def getModel(name):
     input_x4 = Input(shape=(41, 12, 1), name="Humidity")
     input_x5 = Input(shape=(41, 12, 1), name="Pressure")
     input_x6 = Input(shape=(41, 12, 1), name="Temperature")
+    input_x7 = Input(shape=(447, 12, 1), name="Ocean")
 
     input_x_1 = concatenate([input_x1, input_x2, input_x3], axis=1)
     nn_1 = Dense(72, activation=tanh)(input_x_1)
@@ -31,11 +32,15 @@ def getModel(name):
     nn_4 = Dense(72, activation=tanh)(nn_4)
     nn_4 = Dropout(0.5)(nn_4)
 
+    nn_5 = Flatten()(input_x7)
+    nn_5 = Dense(72, activation=tanh)(nn_5)
+    nn_5 = Dropout(0.5)(nn_5)
+
     # ann concat branches
-    nn_concat = concatenate([nn_1, nn_2, nn_3, nn_4])
+    nn_concat = concatenate([nn_1, nn_2, nn_3, nn_4, nn_5])
 
     # joint two models
     dense_1 = Dense(64, activation=tanh)(nn_concat)
     pred = Dense(1)(dense_1)
-    m = Model(inputs=[input_x1, input_x2, input_x3, input_x4, input_x5, input_x6], outputs=pred, name=name)
+    m = Model(inputs=[input_x1, input_x2, input_x3, input_x4, input_x5, input_x6, input_x7], outputs=pred, name=name)
     return m

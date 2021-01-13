@@ -1,7 +1,8 @@
 import tensorflow as tf
 from tensorflow.keras import Model, Input
+from tensorflow.keras.activations import tanh
 from models.components.ResNet import ResidualBlock
-from tensorflow.keras.layers import Dense, LeakyReLU, MaxPooling2D, Flatten, concatenate
+from tensorflow.keras.layers import Dense, Conv2D, LeakyReLU, AveragePooling2D, Flatten, concatenate
 
 
 def getModel(name):
@@ -24,9 +25,15 @@ def getModel(name):
     # 8 layer residule block
     for _ in range(8):
         x = ResidualBlock(x, filters=8, kernel_size=3, strides=(1, 1), padding='same', shortcut=True)
+    x = AveragePooling2D(pool_size=(2, 2))(x)
 
-    pool = MaxPooling2D(pool_size=(2, 2))(x)
-    flattened = Flatten()(pool)
+    x = Conv2D(16, kernel_size=(3, 3), padding='same', activation=tanh)(x)
+    x = AveragePooling2D(pool_size=(2, 2))
+    x = Conv2D(16, kernel_size=(3, 3), padding='same', activation=tanh)(x)
+    x = AveragePooling2D(pool_size=(2, 2))
+
+    flattened = Flatten()(x)
+    flattened = tf.expand_dims(flattened, -1)
     fc = Dense(64)(flattened)
     fc = LeakyReLU()(Dense(32)(fc))
     pred = Dense(1)(fc)

@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from utils.load_data import concatenate_data
 from tensorflow.keras.utils import plot_model
 from tensorflow.keras.models import load_model
-from tensorflow.keras.callbacks import History, TensorBoard, ModelCheckpoint, Callback
+from tensorflow.keras.callbacks import History, TensorBoard, ModelCheckpoint
 
 
 def train_model(model, epoch, data, loss='mse', optimizer='rmsprop', save_best_only=True, metrics=None, show=False):
@@ -63,10 +63,12 @@ def get_time_stamp():
 # plot the predicted and actual value
 def predict_and_plot(model, x, y, test_size=7, show=False):
     pred = model.predict(x)
+    pred = pred[:, 0]
     plt.figure()
-    plt.plot(pred[:, 0])
+    plt.plot(pred)
     plt.plot(y)
-    plt.vlines(len(y) - test_size, min(min(y), min(pred)), max(max(y), max(pred)), colors="r", linestyles="dashed")
+    min_y, max_y = min(min(y), min(pred)), max(max(y), max(pred))
+    plt.vlines(len(y) - test_size, min_y, max_y, colors="r", linestyles="dashed")
     plt.title('Predicted and Actual')
     plt.ylabel('SMB')
     plt.xlabel('Year')
@@ -94,3 +96,38 @@ def load_and_plot_history(path):
     with open(path, 'rb') as f:
         history = pickle.load(f)
     plot_history(history, show=True)
+
+
+def load_all_and_plot_all(saved_model_base_path, show=False):
+    model_folders = os.listdir(saved_model_base_path)
+    if "loss" in model_folders:
+        model_folders.remove("loss")
+    if not os.path.exists(os.path.join(saved_model_base_path, "loss")):
+        os.makedirs(os.path.join(saved_model_base_path, "loss"))
+    if "PredictedvsActual" in model_folders:
+        model_folders.remove("PredictedvsActual")
+    if not os.path.exists(os.path.join(saved_model_base_path, "PredictedvsActual")):
+        os.makedirs(os.path.join(saved_model_base_path, "PredictedvsActual"))
+    for model_name in model_folders:
+        for model_index, running_time in enumerate(os.listdir(os.path.join(saved_model_base_path, model_name)), 1):
+            base_path = os.path.join(saved_model_base_path, model_name, running_time)
+            with open(os.path.join(base_path, "data.pickle"), 'rb') as f:
+                (x_train, x_test, y_train, y_test) = pickle.load(f)
+            x, y = concatenate_data(x_train, y_train, x_test, y_test)
+            test_size = len(y_test)
+            models_list = os.listdir(os.path.join(base_path, "saved_checkpoints"))
+            if len(models_list) > 0:
+                model = load_check_point(os.path.join(base_path, "saved_checkpoints",
+                                                      models_list[-1]))
+                pred_and_actual_plot = predict_and_plot(model, x, y, test_size=test_size, show=show)
+                pred_and_actual_plot.savefig(os.path.join(saved_model_base_path, "PredictedvsActual",
+                                                          f"{model_name}_value.png"))
+                pred_and_actual_plot.close()
+            if os.path.exists(os.path.join(base_path, "history.pickle")):
+                with open(os.path.join(base_path, "history.pickle"), 'rb') as f:
+                    history = pickle.load(f)
+                history_plot = plot_history(history, show=show)
+                history_plot.savefig(os.path.join(saved_model_base_path, "loss",
+                                                  f"{model_name}_loss.png"))
+                history_plot.close()
+    print("Finished ploting")

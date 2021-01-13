@@ -45,11 +45,11 @@ def load_2d_data(dataframe):
         data = {"year": np.array([year + 1] * height)}
         df_current_year = dataframe.filter(regex=f"^{year}", axis=1)
         for i in range(5, 13):
-            data[i] = df_current_year.filter(regex=f"_{i}$", axis=1).values.squeeze()
+            data[i] = df_current_year.filter(regex=f"_0*{i}$", axis=1).values.squeeze()
         next_year = year + 1
         df_next_year = dataframe.filter(regex=f"^{next_year}", axis=1)
         for i in range(1, 5):
-            data[i] = df_next_year.filter(regex=f"_{i}$", axis=1).values.squeeze()
+            data[i] = df_next_year.filter(regex=f"_0*{i}$", axis=1).values.squeeze()
         data['height'] = np.arange(0, height) * 100
         try:
             df = pd.DataFrame(data)
@@ -83,7 +83,7 @@ def load_2d_array(df, year_range):
     data = []
     for year in df["year"].unique():
         data.append(df[df["year"] == year][[i for i in range(1, 13)]].values)
-    return np.array(data)
+    return np.expand_dims(np.array(data), -1)
 
 
 def load_smb_array(df, year_range):
@@ -123,13 +123,14 @@ def concatenate_data(x1, y1, x2, y2):
     return x_concatenated, y_concatenated
 
 
-def load_data_by_cluster(glacier_assignment_path, glacier_name, centroid_to_igra_map, igra_base_path, dmi_base_path,
-                         smb_path):
+def get_central(glacier_name, glacier_assignment):
+    return glacier_assignment[glacier_assignment['NAME'] == glacier_name]['Central'].values[0]
+
+
+def load_data_by_cluster(glacier_name, central, centroid_to_igra_map, igra_base_path, dmi_base_path,
+                         smb_path, ocean_surface_path=None):
     smb_df = load_smb(glacier_name, pd.read_csv(smb_path))
-    glacier_assignment = pd.read_csv(glacier_assignment_path)
-    central = glacier_assignment[glacier_assignment['NAME'] == glacier_name]['Central'].values[0]
     igra_name = centroid_to_igra_map[central]
-    print(os.path.join(igra_base_path, igra_name), os.path.join(dmi_base_path, str(central)))
     humidity_df = load_2d_data(pd.read_csv(os.path.join(igra_base_path, igra_name, "CalHum_std.csv"), dtype=np.float64))
     pressure_df = load_2d_data(pd.read_csv(os.path.join(igra_base_path, igra_name, "Pressure.csv"), dtype=np.float64))
     temperature_df = load_2d_data(pd.read_csv(os.path.join(igra_base_path, igra_name, "Temp.csv"), dtype=np.float64))
@@ -141,6 +142,9 @@ def load_data_by_cluster(glacier_assignment_path, glacier_name, centroid_to_igra
         pd.read_csv(os.path.join(dmi_base_path, str(central), f"monthly_total_precipitation_{central}.csv"),
                     dtype=np.float64))
     dataframes = [smb_df, humidity_df, pressure_df, temperature_df, cloud_df, wind_df, precipitation_df]
+    if ocean_surface_path is not None:
+        ocean_df = load_2d_data(pd.read_csv(os.path.join(ocean_surface_path, f"cluster{central}_ocean.csv")))
+        dataframes.append(ocean_df)
     common_year_range = set(smb_df["year"])
     for df in dataframes[1:]:
         common_year_range = get_common_year_range(common_year_range, df)
@@ -153,17 +157,7 @@ def load_data_by_cluster(glacier_assignment_path, glacier_name, centroid_to_igra
         load_2d_array(pressure_df, common_year_range),
         load_2d_array(temperature_df, common_year_range)
     ]
-    print("Commmon year range:", common_year_range)
+    if ocean_surface_path is not None:
+        x_data_set.append(load_2d_array(ocean_df, common_year_range))
+    print(f"Data size: {len(common_year_range):>2d} Common year_range: {common_year_range}")
     return x_data_set, smb_array
-
-
-if __name__ == "__main__":
-    centroid_map = {5: 'AASIAAT(EGEDESMINDE)', 1: 'DANMARKSHAVN', 2: 'ITTOQQORTOORMIIT', 4: 'MITTARFIK_NARSARSUAQ',
-                    3: 'TASIILAQ(AMMASSALIK)'}  # 'PITUFFIK',
-
-    x_all, y_all = load_data_by_cluster("../../Training_data/Glaicer_select.csv", "STORSTROMMEN", centroid_map,
-                                        "../../Training_data/IGRA Archieves/", "../../Training_data/DMI_data",
-                                        "../../Training_data/smb_mass_change.csv")
-    for x in x_all:
-        print(x[0])
-    print(y_all)
