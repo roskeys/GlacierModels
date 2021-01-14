@@ -86,7 +86,7 @@ def predict_and_plot(model, x, y, test_size=7, show=False):
                        })
     if os.path.exists("loss_evaluate.csv"):
         eva = pd.read_csv("loss_evaluate.csv")
-        df = pd.concat([eva, df], ignore_index=True)
+        df = pd.concat([eva, df], ignore_index=True, sort=True)
 
     df.to_csv("loss_evaluate.csv")
     min_y, max_y = min(min(y), min(pred)), max(max(y), max(pred))
