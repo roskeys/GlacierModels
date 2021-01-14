@@ -125,8 +125,11 @@ def concatenate_data(x1, y1, x2, y2):
 
 
 def get_central(glacier_name, glacier_assignment):
-    return glacier_assignment[glacier_assignment['NAME'] == glacier_name]['Central'].values[0]
-
+    df = glacier_assignment[glacier_assignment['NAME'] == glacier_name]
+    if len(df) > 0:
+        return df["Central"].values[0]
+    else:
+        raise Exception(f"Central of {glacier_name} not found")
 
 def load_data_by_cluster(glacier_name, central, centroid_to_igra_map, igra_base_path, dmi_base_path,
                          smb_path, ocean_surface_path=None):

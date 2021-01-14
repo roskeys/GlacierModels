@@ -158,7 +158,12 @@ def load_all_and_plot_all(saved_model_base_path, show=False):
 
 def run_training(glaciers, category, model_names, glacier_df, centroid_map, epoch=2000):
     for glacier in glaciers:
-        central = get_central(glacier, glacier_df)
+        try:
+            central = get_central(glacier, glacier_df)
+        except Exception as e:
+            if "Central of " in str(e):
+                print(str(e))
+                continue
         print(f"Start training for glacier: {glacier} Central: {central}")
         if category == "basic":
             x_all, y_all = load_data_by_cluster(glacier, central, centroid_map,
