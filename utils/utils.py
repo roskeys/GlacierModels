@@ -79,14 +79,15 @@ def predict_and_plot(model, x, y, test_size=7, show=False):
     std, train_std, test_std = np.std(diff), np.std(train_diff), np.std(test_diff)
     r2, train_r2, test_r2 = r2_score(y, pred), r2_score(y[:-test_size], pred[:-test_size]), r2_score(y[-test_size:],
                                                                                                      pred[-test_size:])
-    df = pd.DataFrame({"name": [model.name], "loss": [loss], "var": [var], "std": [std],
+    df = pd.DataFrame({"name": [model.name], "loss": [loss], "var": [var], "std": [std], "r2_score": [r2],
                        "train_loss": [train_loss], "train_var": [train_var], "train_std": [train_std],
-                       "test_loss": [test_loss], "test_var": [test_var], "test_std": [test_std],
-                       "r2_score": [r2], "train_r2": [train_r2], "test_r2": [test_r2]
+                       "train_r2": [train_r2],
+                       "test_loss": [test_loss], "test_var": [test_var], "test_std": [test_std], "test_r2": [test_r2]
                        })
     if os.path.exists("loss_evaluate.csv"):
-        eva = pd.read_csv("loss_evaluate.csv")
-        df = pd.concat([eva, df], ignore_index=True, sort=True)
+        eva = pd.read_csv("loss_evaluate.csv", index_col=0)
+        eva = pd.concat([eva, df], sort=False)
+        df = eva
     df.to_csv("loss_evaluate.csv")
     min_y, max_y = min(min(y), min(pred)), max(max(y), max(pred))
     plt.vlines(len(y) - test_size, min_y, max_y, colors="r", linestyles="dashed")
