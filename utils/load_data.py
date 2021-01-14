@@ -1,4 +1,5 @@
 import os
+import pickle
 import re
 import numpy as np
 import pandas as pd
@@ -131,16 +132,27 @@ def load_data_by_cluster(glacier_name, central, centroid_to_igra_map, igra_base_
                          smb_path, ocean_surface_path=None):
     smb_df = load_smb(glacier_name, pd.read_csv(smb_path))
     igra_name = centroid_to_igra_map[central]
-    humidity_df = load_2d_data(pd.read_csv(os.path.join(igra_base_path, igra_name, "CalHum_std.csv"), dtype=np.float64))
-    pressure_df = load_2d_data(pd.read_csv(os.path.join(igra_base_path, igra_name, "Pressure.csv"), dtype=np.float64))
-    temperature_df = load_2d_data(pd.read_csv(os.path.join(igra_base_path, igra_name, "Temp.csv"), dtype=np.float64))
-    cloud_df = load_1d_data(
-        pd.read_csv(os.path.join(dmi_base_path, str(central), f"mean_cloud_{central}.csv"), dtype=np.float64))
-    wind_df = load_1d_data(
-        pd.read_csv(os.path.join(dmi_base_path, str(central), f"mean_wind_{central}.csv"), dtype=np.float64))
-    precipitation_df = load_1d_data(
-        pd.read_csv(os.path.join(dmi_base_path, str(central), f"monthly_total_precipitation_{central}.csv"),
-                    dtype=np.float64))
+    if not os.path.exists(os.path.join(f"cache/{central}.pickle")):
+        humidity_df = load_2d_data(
+            pd.read_csv(os.path.join(igra_base_path, igra_name, "CalHum_std.csv"), dtype=np.float64))
+        pressure_df = load_2d_data(
+            pd.read_csv(os.path.join(igra_base_path, igra_name, "Pressure.csv"), dtype=np.float64))
+        temperature_df = load_2d_data(
+            pd.read_csv(os.path.join(igra_base_path, igra_name, "Temp.csv"), dtype=np.float64))
+        cloud_df = load_1d_data(
+            pd.read_csv(os.path.join(dmi_base_path, str(central), f"mean_cloud_{central}.csv"), dtype=np.float64))
+        wind_df = load_1d_data(
+            pd.read_csv(os.path.join(dmi_base_path, str(central), f"mean_wind_{central}.csv"), dtype=np.float64))
+        precipitation_df = load_1d_data(
+            pd.read_csv(os.path.join(dmi_base_path, str(central), f"monthly_total_precipitation_{central}.csv"),
+                        dtype=np.float64))
+        if not os.path.exists("cache"):
+            os.makedirs("cache")
+        with open(os.path.join(f"cache/cache_{central}.pickle"), 'wb') as f:
+            pickle.dump([humidity_df, pressure_df, temperature_df, cloud_df, wind_df, precipitation_df], f)
+    else:
+        with open(os.path.join(f"cache/cache_{central}.pickle"), 'rb') as f:
+            (humidity_df, pressure_df, temperature_df, cloud_df, wind_df, precipitation_df) = pickle.load(f)
     dataframes = [smb_df, humidity_df, pressure_df, temperature_df, cloud_df, wind_df, precipitation_df]
     if ocean_surface_path is not None:
         ocean_df = load_2d_data(pd.read_csv(os.path.join(ocean_surface_path, f"cluster{central}_ocean.csv")))

@@ -2,6 +2,7 @@ import os
 import sys
 
 model_groups = ["basic", "ocean", "oceanreanalysis"]
+import glob
 
 for path in model_groups:
     sys.path.insert(0, os.path.join(os.path.abspath("."), "models", path))
@@ -50,7 +51,9 @@ glaciers = [
 
 if train:
     for categories in model_groups:
-        # get all the models
+        files = glob.glob("cache/*.pickle")
+        for file in files:
+            os.remove(file)
         model_files = os.listdir(f"models/{categories}")
         model_files.remove("__init__.py")
         if "__pycache__" in model_files:

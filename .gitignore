@@ -1,10 +1,12 @@
 data/OriginData/
 saved_models/
 __pycache__/
+cache/
 backup*
 .idea/
 venv/
 .ipynb_checkpoints
+test*
 *test.py
 .cache
 *.iml
