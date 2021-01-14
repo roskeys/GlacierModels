@@ -90,7 +90,7 @@ def predict_and_plot(model, x, y, test_size=7, show=False):
     df.to_csv("loss_evaluate.csv")
     min_y, max_y = min(min(y), min(pred)), max(max(y), max(pred))
     plt.vlines(len(y) - test_size, min_y, max_y, colors="r", linestyles="dashed")
-    plt.text(0, 0, f'R2:{r2}, val_R2{test_r2}')
+    plt.text(0, min(min(y), min(pred)), f'R2:{r2:.2f}, valR2:{test_r2:.2f}')
     plt.title(model.name)
     plt.ylabel('SMB')
     plt.xlabel('Year')

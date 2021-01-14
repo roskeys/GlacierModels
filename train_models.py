@@ -32,7 +32,7 @@ glaciers = [
     # cluster 5
     'JAKOBSHAVN_ISBRAE',  # 230 km
     "ICE_CAPS_SW",  # 177 km
-    "SERMEQ_KUJALLEQ"  # 
+    "SERMEQ_KUJALLEQ"  #
     # cluster 4
     "QAJUUTTAP_SERMIA",  # 52 km
     "SERMILIGAARSSUK_BRAE",  # 141 km
