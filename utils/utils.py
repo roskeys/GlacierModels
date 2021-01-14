@@ -87,11 +87,11 @@ def predict_and_plot(model, x, y, test_size=7, show=False):
     if os.path.exists("loss_evaluate.csv"):
         eva = pd.read_csv("loss_evaluate.csv")
         df = pd.concat([eva, df], ignore_index=True, sort=True)
-
     df.to_csv("loss_evaluate.csv")
     min_y, max_y = min(min(y), min(pred)), max(max(y), max(pred))
     plt.vlines(len(y) - test_size, min_y, max_y, colors="r", linestyles="dashed")
-    plt.title('Predicted and Actual')
+    plt.text(0, 0, f'R2:{r2}, val_R2{test_r2}')
+    plt.title(model.name)
     plt.ylabel('SMB')
     plt.xlabel('Year')
     plt.legend(['Predicted', 'Actual'], loc='upper left')
