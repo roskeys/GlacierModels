@@ -33,7 +33,6 @@ def getModel(name, height_range=41, ocean_dim=None):
     x = AveragePooling2D(pool_size=(2, 2))(x)
 
     flattened = Flatten()(x)
-    flattened = tf.expand_dims(flattened, -1)
     fc = Dense(64)(flattened)
     fc = LeakyReLU()(Dense(32)(fc))
     pred = Dense(1)(fc)

@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 import importlib
 import matplotlib.pyplot as plt
+from sklearn.metrics import r2_score
 from utils.load_data import concatenate_data
 from tensorflow.keras.utils import plot_model
 from tensorflow.keras.models import load_model
@@ -76,12 +77,17 @@ def predict_and_plot(model, x, y, test_size=7, show=False):
         np.power(test_diff, 2))
     var, train_var, test_var = np.var(diff), np.var(train_diff), np.var(test_diff)
     std, train_std, test_std = np.std(diff), np.std(train_diff), np.std(test_diff)
+    r2, train_r2, test_r2 = r2_score(y, pred), r2_score(y[:-test_size], pred[:-test_size]), r2_score(y[-test_size:],
+                                                                                                     pred[-test_size:])
     df = pd.DataFrame({"name": [model.name], "loss": [loss], "var": [var], "std": [std],
                        "train_loss": [train_loss], "train_var": [train_var], "train_std": [train_std],
-                       "test_loss": [test_loss], "test_var": [test_var], "test_std": [test_std]})
+                       "test_loss": [test_loss], "test_var": [test_var], "test_std": [test_std],
+                       "r2_score":[r2], "train_r2":[train_r2], "test_r2":[test_r2]
+                       })
     if os.path.exists("loss_evaluate.csv"):
         eva = pd.read_csv("loss_evaluate.csv")
         df = pd.concat([eva, df], ignore_index=True)
+
     df.to_csv("loss_evaluate.csv")
     min_y, max_y = min(min(y), min(pred)), max(max(y), max(pred))
     plt.vlines(len(y) - test_size, min_y, max_y, colors="r", linestyles="dashed")
