@@ -2,6 +2,7 @@ import os
 import time
 import pickle
 import numpy as np
+import pandas as pd
 import importlib
 import matplotlib.pyplot as plt
 from utils.load_data import concatenate_data
@@ -69,11 +70,19 @@ def predict_and_plot(model, x, y, test_size=7, show=False):
     plt.figure()
     plt.plot(pred)
     plt.plot(y)
-    loss = np.sum(np.power(pred - y, 2))
-    var = np.var(pred - y)
-    if loss < 0.5 and var < 0.002 and np.sum(np.abs(pred - y)) < 1:
-        with open("glaciers.txt", 'a') as f:
-            f.write(f"{model.name}, var{var}\n")
+    diff = pred - y
+    train_diff, test_diff = diff[:-test_size], diff[-test_size:]
+    loss, train_loss, test_loss = np.sum(np.power(diff, 2)), np.sum(np.power(train_diff, 2)), np.sum(
+        np.power(test_diff, 2))
+    var, train_var, test_var = np.var(diff), np.var(train_diff), np.var(test_diff)
+    std, train_std, test_std = np.std(diff), np.std(train_diff), np.std(test_diff)
+    df = pd.DataFrame({"name": [model.name], "loss": [loss], "var": [var], "std": [std],
+                       "train_loss": [train_loss], "train_var": [train_var], "train_std": [train_std],
+                       "test_loss": [test_loss], "test_var": [test_var], "test_std": [test_std]})
+    if os.path.exists("loss_evaluate.csv"):
+        eva = pd.read_csv("loss_evaluate.csv")
+        df = pd.concat([eva, df], ignore_index=True)
+    df.to_csv("loss_evaluate.csv")
     min_y, max_y = min(min(y), min(pred)), max(max(y), max(pred))
     plt.vlines(len(y) - test_size, min_y, max_y, colors="r", linestyles="dashed")
     plt.title('Predicted and Actual')
