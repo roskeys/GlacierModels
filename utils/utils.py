@@ -82,7 +82,7 @@ def predict_and_plot(model, x, y, test_size=7, show=False):
     df = pd.DataFrame({"name": [model.name], "loss": [loss], "var": [var], "std": [std],
                        "train_loss": [train_loss], "train_var": [train_var], "train_std": [train_std],
                        "test_loss": [test_loss], "test_var": [test_var], "test_std": [test_std],
-                       "r2_score":[r2], "train_r2":[train_r2], "test_r2":[test_r2]
+                       "r2_score": [r2], "train_r2": [train_r2], "test_r2": [test_r2]
                        })
     if os.path.exists("loss_evaluate.csv"):
         eva = pd.read_csv("loss_evaluate.csv")
@@ -191,5 +191,5 @@ def run_training(glaciers, category, model_names, glacier_df, centroid_map, epoc
                                         ocean_dim=x_all[-1].shape[1])
                 print("#" * 20, "Start to train model: ", f"{module_name}_{glacier[:10]}", "#" * 20)
                 train_model(model, epoch=epoch, data=(x_train, x_test, y_train, y_test),
-                            loss='mse', optimizer='rmsprop', save_best_only=True, metrics=['mse'])
+                            loss='huber_loss', optimizer='SGD', save_best_only=True, metrics=['mse'])
     print("Finished Training")
