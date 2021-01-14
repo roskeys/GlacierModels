@@ -1,3 +1,4 @@
+import tensorflow as tf
 from tensorflow.keras import Model, Input
 from tensorflow.keras.activations import tanh
 from tensorflow.keras.layers import Dense, Dropout,LSTM, Conv2D, Flatten, concatenate
@@ -41,6 +42,7 @@ def getModel(name):
 
     # joint two models
     x = concatenate([nn_1, flattened])
+    x = tf.expand_dims(x, -1)
     lstm = LSTM(64)(x)
     fc = Dense(32)(lstm)
     pred = Dense(1)(fc)

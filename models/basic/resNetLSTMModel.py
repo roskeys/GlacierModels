@@ -33,8 +33,8 @@ def getModel(name):
     x = AveragePooling2D(pool_size=(2, 2))(x)
 
     flattened = Flatten()(x)
-    flattened = tf.expand_dims(flattened, -1)
-    lstm = LSTM(64)(flattened)
+    x = tf.expand_dims(flattened, -1)
+    lstm = LSTM(64)(x)
     fc = LeakyReLU()(Dense(32)(lstm))
     pred = Dense(1)(fc)
     m = Model(inputs=[input_x1, input_x2, input_x3, input_x4, input_x5, input_x6], outputs=pred, name=name)
