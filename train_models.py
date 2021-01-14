@@ -27,24 +27,44 @@ centroid_map = {5: 'AASIAAT(EGEDESMINDE)', 1: 'DANMARKSHAVN', 2: 'ITTOQQORTOORMI
                 3: 'TASIILAQ(AMMASSALIK)'}  # 'PITUFFIK',
 
 glacier_df = pd.read_csv("../Training_data/Glaicer_select.csv")
-glaciers = glacier_df[glacier_df["Distance"] < 120]
 
-final_df = pd.DataFrame()
-for i in range(1, 6):
-    central_i = glacier_df[glacier_df["Central"] == i].tail(3)
-    final_df = pd.concat([final_df, central_i], ignore_index=True)
-
-glaciers_set = final_df["NAME"].unique()
 glaciers = [
-    'JAKOBSHAVN_ISBRAE', 'DENDRITGLETSCHER', 'EQALORUTSIT_KILLIIT_SERMIAT', 'FENRISGLETSCHER', "SERMILIK",
-    "SIORALIK-ARSUK-QIPISAQQU",
-    "SORANERBRAEEN-EINAR_MIKKELSEN-HEINKEL-TVEGEGLETSCHER-PASTERZE", "STORSTROMMEN", "SW_NONAME1", "UKAASORSUAQ",
-    "AB_DRACHMANN_GLETSCHER_L_BISTRUP_BRAE", "ADMIRALTY_TREFORK_KRUSBR_BORGJKEL_PONY", "KIATTUUT-QOOQQUP",
-    "NAAJAT_SERMIAT", "SERMILIGAARSSUK_BRAE", "SYDBR", "HELHEIMGLETSCHER", "APUSEERAJIK", 'QAJUUTTAP_SERMIA',
-    'KNUD-RASMUSSEN', "MIDGARDGLETSCHER", 'BREDEGLETSJER', "GEIKIE2", "NIGERTULUUP_KATTILERTARPIA",
+    # cluster 5
+    'JAKOBSHAVN_ISBRAE',  # 230 km
+    "ICE_CAPS_SW",  # 177 km
+    "SERMEQ_KUJALLEQ" # 
+    # cluster 4
+    "QAJUUTTAP_SERMIA",  # 52 km
+    "SERMILIGAARSSUK_BRAE",  # 141 km
+    # cluter 3
+    "BUSSEMAND",  # 61 km
+    "ICE_CAPS_CE",  # 173 km
+    "HELHEIMGLETSCHER" # 174
+    # cluster 2
+    "GEIKIE3",  # 88 km
+    "DENDRITGLETSCHER",  # 193 km
+    # cluster 1
+    "AB_DRACHMANN_GLETSCHER_L_BISTRUP_BRAE",  # 149 km
+    "STORSTROMMEN"  # 164
 ]
-for g in glaciers_set:
-    glaciers.append(g)
+# glaciers = glacier_df[glacier_df["Distance"] < 120]
+#
+# final_df = pd.DataFrame()
+# for i in range(1, 6):
+#     central_i = glacier_df[glacier_df["Central"] == i].tail(3)
+#     final_df = pd.concat([final_df, central_i], ignore_index=True)
+#
+# glaciers_set = final_df["NAME"].unique()
+# glaciers = [
+#     'JAKOBSHAVN_ISBRAE', 'DENDRITGLETSCHER', 'EQALORUTSIT_KILLIIT_SERMIAT', 'FENRISGLETSCHER', "SERMILIK",
+#     "SIORALIK-ARSUK-QIPISAQQU",
+#     "SORANERBRAEEN-EINAR_MIKKELSEN-HEINKEL-TVEGEGLETSCHER-PASTERZE", "STORSTROMMEN", "SW_NONAME1", "UKAASORSUAQ",
+#     "AB_DRACHMANN_GLETSCHER_L_BISTRUP_BRAE", "ADMIRALTY_TREFORK_KRUSBR_BORGJKEL_PONY", "KIATTUUT-QOOQQUP",
+#     "NAAJAT_SERMIAT", "SERMILIGAARSSUK_BRAE", "SYDBR", "HELHEIMGLETSCHER", "APUSEERAJIK", 'QAJUUTTAP_SERMIA',
+#     'KNUD-RASMUSSEN', "MIDGARDGLETSCHER", 'BREDEGLETSJER', "GEIKIE2", "NIGERTULUUP_KATTILERTARPIA",
+# ]
+# for g in glaciers_set:
+#     glaciers.append(g)
 
 if train:
     for categories in model_groups:
