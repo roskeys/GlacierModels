@@ -1,15 +1,14 @@
 import os
 import sys
 
-model_groups = "basic"
+model_groups = ["basic", "ocean", "oceanreanalysis"]
 
-sys.path.insert(0, os.path.join(os.path.abspath("."), "models", model_groups))
+for path in model_groups:
+    sys.path.insert(0, os.path.join(os.path.abspath("."), "models", path))
+
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
-import importlib
-import numpy as np
 import pandas as pd
-from utils.utils import train_model, load_all_and_plot_all
-from utils.load_data import train_test_split, load_data_by_cluster, get_central
+from utils.utils import load_all_and_plot_all, run_training
 
 if os.name == "nt":
     epoch = 2
@@ -26,12 +25,7 @@ else:
 
 centroid_map = {5: 'AASIAAT(EGEDESMINDE)', 1: 'DANMARKSHAVN', 2: 'ITTOQQORTOORMIIT', 4: 'MITTARFIK_NARSARSUAQ',
                 3: 'TASIILAQ(AMMASSALIK)'}  # 'PITUFFIK',
-# get all the models
-model_files = os.listdir(f"models/{model_groups}")
-model_files.remove("__init__.py")
-if "__pycache__" in model_files:
-    model_files.remove("__pycache__")
-model_names = [n[:-3] for n in model_files]
+
 glacier_df = pd.read_csv("../Training_data/Glaicer_select.csv")
 glaciers = glacier_df[glacier_df["Distance"] < 120]
 
@@ -53,41 +47,13 @@ for g in glaciers_set:
     glaciers.append(g)
 
 if train:
-    for glacier in glaciers:
-        central = get_central(glacier, glacier_df)
-        print(f"Start training for glacier: {glacier} Central: {central}")
-        if model_groups == "basic":
-            x_all, y_all = load_data_by_cluster(glacier, central, centroid_map,
-                                                "../Training_data/IGRA Archieves/",
-                                                "../Training_data/DMI_data",
-                                                "../Training_data/smb_mass_change.csv")
-        elif model_groups == "ocean":
-            x_all, y_all = load_data_by_cluster(glacier, central, centroid_map,
-                                                "../Training_data/IGRA Archieves/",
-                                                "../Training_data/DMI_data",
-                                                "../Training_data/smb_mass_change.csv",
-                                                ocean_surface_path="../Training_data/OceanSurface_observed")
-        elif model_groups == "oceanreanalysis":
-            x_all, y_all = load_data_by_cluster(glacier, central, centroid_map, "../Training_data/IGRA Archieves/",
-                                                "../Training_data/DMI_data", "../Training_data/smb_mass_change.csv",
-                                                ocean_surface_path="../Training_data/Ocean_Temperature_5m_Reanalysis")
-        else:
-            raise Exception("Model groups not found")
-        data_size = len(y_all)
-        if data_size < 20 or np.sum(np.power(y_all, 2)) < 0.1:
-            continue
-        else:
-            for x in x_all:
-                print(x.shape, end=" ")
-            print(y_all.shape)
-            test_size = int(data_size * 0.2)
-            x_train, x_test, y_train, y_test = train_test_split(x_all, y_all, test_size=test_size)
-            for module_name in model_names:
-                module = importlib.import_module(module_name)
-                model = module.getModel(f"{module_name}_{glacier[:15]}")
-                print("#" * 20, "Start to train model: ", f"{module_name}_{glacier[:10]}", "#" * 20)
-                train_model(model, epoch=epoch, data=(x_train, x_test, y_train, y_test),
-                            loss='mse', optimizer='rmsprop', save_best_only=True, metrics=['mse'])
-    print("Finished Training")
+    for categories in model_groups:
+        # get all the models
+        model_files = os.listdir(f"models/{categories}")
+        model_files.remove("__init__.py")
+        if "__pycache__" in model_files:
+            model_files.remove("__pycache__")
+        model_names = [n[:-3] for n in model_files]
+        run_training(glaciers, categories, model_names, glacier_df, centroid_map, epoch=epoch)
 if plot:
     load_all_and_plot_all("saved_models", show=False)

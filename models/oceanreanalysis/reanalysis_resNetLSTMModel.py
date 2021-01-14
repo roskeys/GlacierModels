@@ -5,7 +5,7 @@ from models.components.ResNet import ResidualBlock
 from tensorflow.keras.layers import Dense, LSTM, Conv2D, AveragePooling2D, Flatten, concatenate
 
 
-def getModel(name):
+def getModel(name, height_range=41, ocean_dim=None):
     # a training example is one dimensional vector 36 is the size
     input_x1 = Input(shape=(12,), name="cloud")
     input_x2 = Input(shape=(12,), name="precipitation")
@@ -16,10 +16,10 @@ def getModel(name):
     input_x1_3 = tf.expand_dims(tf.expand_dims(input_x3, 1), -1)
 
     # a training example is 6 values a month,
-    input_x4 = Input(shape=(41, 12, 1), name="Humidity")
-    input_x5 = Input(shape=(41, 12, 1), name="Pressure")
-    input_x6 = Input(shape=(41, 12, 1), name="Temperature")
-    input_x7 = Input(shape=(447, 12, 1), name="Ocean")
+    input_x4 = Input(shape=(height_range, 12, 1), name="Humidity")
+    input_x5 = Input(shape=(height_range, 12, 1), name="Pressure")
+    input_x6 = Input(shape=(height_range, 12, 1), name="Temperature")
+    input_x7 = Input(shape=(ocean_dim, 12, 1), name="Ocean")
 
     x = concatenate([input_x1_1, input_x1_2, input_x1_3, input_x4, input_x5, input_x6, input_x7], axis=1)
 

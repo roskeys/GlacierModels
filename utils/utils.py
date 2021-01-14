@@ -2,11 +2,13 @@ import os
 import time
 import pickle
 import numpy as np
+import importlib
 import matplotlib.pyplot as plt
 from utils.load_data import concatenate_data
 from tensorflow.keras.utils import plot_model
 from tensorflow.keras.models import load_model
 from tensorflow.keras.callbacks import History, TensorBoard, ModelCheckpoint
+from utils.load_data import get_central, load_data_by_cluster, train_test_split
 
 
 def train_model(model, epoch, data, loss='mse', optimizer='rmsprop', save_best_only=True, metrics=None, show=False):
@@ -136,3 +138,43 @@ def load_all_and_plot_all(saved_model_base_path, show=False):
                                                   f"{model_name}_loss.png"))
                 history_plot.close()
     print("Finished ploting")
+
+
+def run_training(glaciers, category, model_names, glacier_df, centroid_map, epoch=2000):
+    for glacier in glaciers:
+        central = get_central(glacier, glacier_df)
+        print(f"Start training for glacier: {glacier} Central: {central}")
+        if category == "basic":
+            x_all, y_all = load_data_by_cluster(glacier, central, centroid_map,
+                                                "../Training_data/IGRA Archieves/",
+                                                "../Training_data/DMI_data",
+                                                "../Training_data/smb_mass_change.csv")
+        elif category == "ocean":
+            x_all, y_all = load_data_by_cluster(glacier, central, centroid_map,
+                                                "../Training_data/IGRA Archieves/",
+                                                "../Training_data/DMI_data",
+                                                "../Training_data/smb_mass_change.csv",
+                                                ocean_surface_path="../Training_data/OceanSurface_observed")
+        elif category == "oceanreanalysis":
+            x_all, y_all = load_data_by_cluster(glacier, central, centroid_map, "../Training_data/IGRA Archieves/",
+                                                "../Training_data/DMI_data", "../Training_data/smb_mass_change.csv",
+                                                ocean_surface_path="../Training_data/Ocean_Temperature_5m_Reanalysis")
+        else:
+            raise Exception("Model groups not found")
+        data_size = len(y_all)
+        if data_size < 16 or np.sum(np.power(y_all, 2)) < 0.1:
+            continue
+        else:
+            for x in x_all:
+                print(x.shape, end=" ")
+            print(y_all.shape)
+            test_size = int(data_size * 0.2)
+            x_train, x_test, y_train, y_test = train_test_split(x_all, y_all, test_size=test_size)
+            for module_name in model_names:
+                module = importlib.import_module(module_name)
+                model = module.getModel(f"{module_name}_{glacier[:15]}", height_range=x_all[3].shape[1],
+                                        ocean_dim=x_all[-1].shape[1])
+                print("#" * 20, "Start to train model: ", f"{module_name}_{glacier[:10]}", "#" * 20)
+                train_model(model, epoch=epoch, data=(x_train, x_test, y_train, y_test),
+                            loss='mse', optimizer='rmsprop', save_best_only=True, metrics=['mse'])
+    print("Finished Training")

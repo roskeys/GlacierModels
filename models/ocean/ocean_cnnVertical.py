@@ -3,17 +3,17 @@ from tensorflow.keras.activations import tanh
 from tensorflow.keras.layers import Dense, Dropout, Conv2D, Flatten, concatenate
 
 
-def getModel(name):
+def getModel(name, height_range=41, ocean_dim=None):
     # a training example is one dimensional vector 36 is the size
     input_x1 = Input(shape=(12,), name="cloud")
     input_x2 = Input(shape=(12,), name="precipitation")
     input_x3 = Input(shape=(12,), name="wind")
 
     # a training example is 6 values a month,
-    input_x4 = Input(shape=(41, 12, 1), name="Humidity")
-    input_x5 = Input(shape=(41, 12, 1), name="Pressure")
-    input_x6 = Input(shape=(41, 12, 1), name="Temperature")
-    input_x7 = Input(shape=(9, 12, 1), name="Ocean")
+    input_x4 = Input(shape=(height_range, 12, 1), name="Humidity")
+    input_x5 = Input(shape=(height_range, 12, 1), name="Pressure")
+    input_x6 = Input(shape=(height_range, 12, 1), name="Temperature")
+    input_x7 = Input(shape=(ocean_dim, 12, 1), name="Ocean")
 
     # nn model
     input_x_1 = concatenate([input_x1, input_x2, input_x3], axis=1)
@@ -21,13 +21,13 @@ def getModel(name):
     nn_1 = Dropout(0.5)(nn_1)
 
     # cnn layer 1 branch 1
-    cnn_1_1 = Conv2D(16, kernel_size=(41, 1), padding='valid', activation=tanh)(input_x4)
+    cnn_1_1 = Conv2D(16, kernel_size=(height_range, 1), padding='valid', activation=tanh)(input_x4)
     # cnn layer 1 branch 2
-    cnn_1_2 = Conv2D(16, kernel_size=(41, 1), padding='valid', activation=tanh)(input_x5)
+    cnn_1_2 = Conv2D(16, kernel_size=(height_range, 1), padding='valid', activation=tanh)(input_x5)
     # cnn layer 1 branch 3
-    cnn_1_3 = Conv2D(16, kernel_size=(41, 1), padding='valid', activation=tanh)(input_x6)
+    cnn_1_3 = Conv2D(16, kernel_size=(height_range, 1), padding='valid', activation=tanh)(input_x6)
     # cnn layer 1 branch 4
-    cnn_1_4 = Conv2D(16, kernel_size=(9, 1), padding='valid', activation=tanh)(input_x7)
+    cnn_1_4 = Conv2D(16, kernel_size=(ocean_dim, 1), padding='valid', activation=tanh)(input_x7)
 
     # cnn layer 1 branch 1
     cnn_1_1 = Conv2D(4, kernel_size=(1, 2), padding='same', activation=tanh)(cnn_1_1)
