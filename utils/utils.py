@@ -73,12 +73,12 @@ def predict_and_plot(model, x, y, test_size=7, show=False):
     plt.plot(y)
     diff = pred - y
     train_diff, test_diff = diff[:-test_size], diff[-test_size:]
-    loss, train_loss, test_loss = np.sum(np.power(diff, 2)), np.sum(np.power(train_diff, 2)), np.sum(
-        np.power(test_diff, 2))
+    loss, train_loss, test_loss = np.sum(np.power(diff, 2)) / len(diff), np.sum(np.power(train_diff, 2)) / len(
+        train_diff), np.sum(np.power(test_diff, 2)) / len(test_diff)
     var, train_var, test_var = np.var(diff), np.var(train_diff), np.var(test_diff)
     std, train_std, test_std = np.std(diff), np.std(train_diff), np.std(test_diff)
-    r2, train_r2, test_r2 = r2_score(y, pred), r2_score(y[:-test_size], pred[:-test_size]), r2_score(y[-test_size:],
-                                                                                                     pred[-test_size:])
+    r2, train_r2, test_r2 = r2_score(y, pred), r2_score(y[:-test_size], pred[:-test_size]), \
+                            r2_score(y[-test_size:], pred[-test_size:])
     df = pd.DataFrame({"name": [model.name], "loss": [loss], "var": [var], "std": [std], "r2_score": [r2],
                        "train_loss": [train_loss], "train_var": [train_var], "train_std": [train_std],
                        "train_r2": [train_r2],
@@ -157,7 +157,9 @@ def load_all_and_plot_all(saved_model_base_path, show=False):
 
 
 def run_training(glaciers, category, model_names, glacier_df, centroid_map, epoch=2000, loss='mse', optimizer='rmsprop',
-                 save_best_only=True, metrics=None):
+                 save_best_only=True, metrics=None, new_precipitation_path=None, combine=False):
+    if combine:
+        all_data = None
     for glacier in glaciers:
         try:
             central = get_central(glacier, glacier_df)
@@ -166,23 +168,29 @@ def run_training(glaciers, category, model_names, glacier_df, centroid_map, epoc
                 print(str(e))
                 continue
         print(f"Start training for glacier: {glacier} Central: {central}")
-        if category == "basic":
-            x_all, y_all = load_data_by_cluster(glacier, central, centroid_map,
-                                                "../Training_data/IGRA Archieves/",
-                                                "../Training_data/DMI_data",
-                                                "../Training_data/smb_mass_change.csv")
-        elif category == "ocean":
-            x_all, y_all = load_data_by_cluster(glacier, central, centroid_map,
-                                                "../Training_data/IGRA Archieves/",
-                                                "../Training_data/DMI_data",
-                                                "../Training_data/smb_mass_change.csv",
-                                                ocean_surface_path="../Training_data/OceanSurface_observed")
-        elif category == "oceanreanalysis":
-            x_all, y_all = load_data_by_cluster(glacier, central, centroid_map, "../Training_data/IGRA Archieves/",
-                                                "../Training_data/DMI_data", "../Training_data/smb_mass_change.csv",
-                                                ocean_surface_path="../Training_data/Ocean_Temperature_5m_Reanalysis")
-        else:
-            raise Exception("Model groups not found")
+        try:
+            if category == "basic":
+                x_all, y_all = load_data_by_cluster(glacier, central, centroid_map,
+                                                    "../Training_data/IGRA Archieves/",
+                                                    "../Training_data/DMI_data",
+                                                    "../Training_data/smb_mass_change.csv",
+                                                    new_precipitation_path=new_precipitation_path)
+            elif category == "ocean":
+                x_all, y_all = load_data_by_cluster(glacier, central, centroid_map,
+                                                    "../Training_data/IGRA Archieves/",
+                                                    "../Training_data/DMI_data",
+                                                    "../Training_data/smb_mass_change.csv",
+                                                    ocean_surface_path="../Training_data/OceanSurface_observed",
+                                                    new_precipitation_path=new_precipitation_path)
+            elif category == "oceanreanalysis":
+                x_all, y_all = load_data_by_cluster(glacier, central, centroid_map, "../Training_data/IGRA Archieves/",
+                                                    "../Training_data/DMI_data", "../Training_data/smb_mass_change.csv",
+                                                    ocean_surface_path="../Training_data/Ocean_Temperature_5m_Reanalysis",
+                                                    new_precipitation_path=new_precipitation_path)
+            else:
+                raise Exception("Model groups not found")
+        except FileNotFoundError:
+            continue
         data_size = len(y_all)
         if data_size < 16 or np.sum(np.power(y_all, 2)) < 0.1:
             continue

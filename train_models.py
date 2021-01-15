@@ -60,6 +60,8 @@ if train:
             model_files.remove("__pycache__")
         model_names = [n[:-3] for n in model_files]
         run_training(glaciers, categories, model_names, glacier_df, centroid_map, epoch=epoch, loss='huber_loss',
-                     optimizer='SGD', save_best_only=True, metrics=["r2_score"])
+                     optimizer='SGD', save_best_only=True, metrics=["mse"],
+                     # new_precipitation_path="../Training_data/GPCP_precipitation/precip_data_glaciers",
+                     combine=False)
 if plot:
     load_all_and_plot_all("saved_models", show=False)

@@ -131,8 +131,9 @@ def get_central(glacier_name, glacier_assignment):
     else:
         raise Exception(f"Central of {glacier_name} not found")
 
+
 def load_data_by_cluster(glacier_name, central, centroid_to_igra_map, igra_base_path, dmi_base_path,
-                         smb_path, ocean_surface_path=None):
+                         smb_path, ocean_surface_path=None, new_precipitation_path=None):
     smb_df = load_smb(glacier_name, pd.read_csv(smb_path))
     igra_name = centroid_to_igra_map[central]
     if not os.path.exists(os.path.join(f"cache/{central}.pickle")):
@@ -146,9 +147,13 @@ def load_data_by_cluster(glacier_name, central, centroid_to_igra_map, igra_base_
             pd.read_csv(os.path.join(dmi_base_path, str(central), f"mean_cloud_{central}.csv"), dtype=np.float64))
         wind_df = load_1d_data(
             pd.read_csv(os.path.join(dmi_base_path, str(central), f"mean_wind_{central}.csv"), dtype=np.float64))
-        precipitation_df = load_1d_data(
-            pd.read_csv(os.path.join(dmi_base_path, str(central), f"monthly_total_precipitation_{central}.csv"),
-                        dtype=np.float64))
+        if new_precipitation_path is not None:
+            precipitation_df = load_2d_data(
+                pd.read_csv(os.path.join(new_precipitation_path, f"gpcp_precip_{glacier_name}.csv"), dtype=np.float64))
+        else:
+            precipitation_df = load_1d_data(
+                pd.read_csv(os.path.join(dmi_base_path, str(central), f"monthly_total_precipitation_{central}.csv"),
+                            dtype=np.float64))
         if not os.path.exists("cache"):
             os.makedirs("cache")
         with open(os.path.join(f"cache/cache_{central}.pickle"), 'wb') as f:
