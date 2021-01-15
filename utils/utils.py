@@ -156,7 +156,8 @@ def load_all_and_plot_all(saved_model_base_path, show=False):
     print("Finished ploting")
 
 
-def run_training(glaciers, category, model_names, glacier_df, centroid_map, epoch=2000):
+def run_training(glaciers, category, model_names, glacier_df, centroid_map, epoch=2000, loss='mse', optimizer='rmsprop',
+                 save_best_only=True, metrics=None):
     for glacier in glaciers:
         try:
             central = get_central(glacier, glacier_df)
@@ -197,5 +198,5 @@ def run_training(glaciers, category, model_names, glacier_df, centroid_map, epoc
                                         ocean_dim=x_all[-1].shape[1])
                 print("#" * 20, "Start to train model: ", f"{module_name}_{glacier[:10]}", "#" * 20)
                 train_model(model, epoch=epoch, data=(x_train, x_test, y_train, y_test),
-                            loss='huber_loss', optimizer='SGD', save_best_only=True, metrics=['mse'])
+                            loss=loss, optimizer=optimizer, save_best_only=save_best_only, metrics=metrics)
     print("Finished Training")
